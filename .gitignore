@@ -1,0 +1,5 @@
+/audio
+/node_modules
+.env
+ig_state.json
+googleKeys.json
