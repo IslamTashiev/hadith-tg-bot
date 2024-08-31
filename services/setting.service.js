@@ -1,4 +1,3 @@
-const bot = require("../bot/instance");
 const path = require("path");
 const fs = require("fs").promises;
 
