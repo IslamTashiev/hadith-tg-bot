@@ -150,11 +150,11 @@ bot.on("change_pattern_setting", async () => {
           const data = msg.data;
 
           if (data === "every_friday_hadith_on") {
-            await SettingServices.SettingServices.changeEveryFridaysHadithTime(true);
+            await SettingServices.changeEveryFridaysHadithTime(true);
             await bot.sendMessage(chatId, botText.friday_hadith + botText.on);
             bot.removeListener("callback_query", callbackListener);
           } else if (data === "every_friday_hadith_off") {
-            await SettingServices.SettingServices.changeEveryFridaysHadithTime(false);
+            await SettingServices.changeEveryFridaysHadithTime(false);
             await bot.sendMessage(chatId, botText.friday_hadith + botText.off);
             bot.removeListener("callback_query", callbackListener);
           }
