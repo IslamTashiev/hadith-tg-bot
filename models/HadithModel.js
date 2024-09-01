@@ -10,6 +10,7 @@ const HadithSchema = new mongoose.Schema({
   published: { type: Boolean, default: false },
   skipped: { type: Boolean, default: false },
   author: { type: String, required: true },
+  ratingOfInterest: { type: Number, default: 0 },
 });
 HadithSchema.plugin(random, { path: "random" });
 
