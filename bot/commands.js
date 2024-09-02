@@ -164,7 +164,7 @@ bot.on("authorized_message", async () => {
   bot.onText(/\/check_your_self/, async (msg) => {
     const chatId = msg.chat.id;
 
-    await bot.sendMessage(chatId, "Выберите сложность хадиса:", options.dificultLevels);
+    await bot.sendMessage(chatId, botTexts.chose_dificult, options.dificultLevels);
     bot.emit("chose_dificult", async (dificult) => {
       const rates = {
         1: { max: 300 },
@@ -181,10 +181,7 @@ bot.on("authorized_message", async () => {
       await bot.sendMessage(chatId, hadithText, options.ready);
 
       bot.emit("ready_to_test", async () => {
-        await bot.sendMessage(
-          chatId,
-          "Пожалуйста, отпраьте голосовое сообщение с ответом на вопрос: «Что вы почерпнули из предыдущего хадиса?» За каждое дополнение вы получите баллы."
-        );
+        await bot.sendMessage(chatId, botTexts.send_voice);
 
         bot.emit("audio_upload", async (filePath) => {
           const { text: transcribedText } = await openaiController.transcribe(filePath);
@@ -196,7 +193,6 @@ bot.on("authorized_message", async () => {
         });
       });
     });
-    // userContexts[chatId] = { ...userContexts[chatId], waitForAudio: true, msg };
   });
 
   bot.removeListener("authorized_message"); // removing authorized_message emit
