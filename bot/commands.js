@@ -5,9 +5,10 @@ const userContexts = require("./context");
 const fs = require("fs");
 
 const { getHadith, infoMarkup, getUnConfirmedHadith, getVoiceHadith } = require("../services/hadith.service");
-const { hadithMessageOptions, sectionsOption, confirmHadithOption, settingsKeyboard } = require("../options");
+const options = require("../options");
 const { settingsMarkup, getSettings } = require("../services/setting.service");
 const { sendPatterns } = require("../services/pattern.service");
+const openaiController = require("../controllers/openai.controller");
 
 bot.on("authorized_message", async () => {
   // start command
@@ -32,7 +33,7 @@ bot.on("authorized_message", async () => {
 
       userContexts[chatId] = { ...infoMessage, hadith };
 
-      await bot.sendMessage(chatId, hadithText, hadithMessageOptions);
+      await bot.sendMessage(chatId, hadithText, options.hadithMessageOptions);
     } catch (e) {
       console.log(e.message);
       await bot.sendMessage(chatId);
@@ -44,7 +45,7 @@ bot.on("authorized_message", async () => {
     const chatId = msg.chat.id;
     try {
       bot.emit("select_section");
-      await bot.sendMessage(chatId, botTexts.chose_theme, sectionsOption());
+      await bot.sendMessage(chatId, botTexts.chose_theme, options.sectionsOption());
     } catch (e) {
       console.log(e.message);
       await bot.sendMessage(chatId);
@@ -121,7 +122,7 @@ bot.on("authorized_message", async () => {
     try {
       const chatId = msg.chat.id;
       const settings = await getSettings();
-      const keyboard = await settingsKeyboard(settings);
+      const keyboard = await options.settingsKeyboard(settings);
 
       bot.sendMessage(chatId, botTexts.chose_setting, keyboard);
       bot.emit("change_pattern_setting");
@@ -138,7 +139,7 @@ bot.on("authorized_message", async () => {
       const hadith = await getUnConfirmedHadith();
       userContexts[chatId] = { hadith, confirmed: false };
       bot.emit("confirm_hadith_emit", { hadith, msg });
-      await bot.sendMessage(chatId, hadith.text, confirmHadithOption);
+      await bot.sendMessage(chatId, hadith.text, options.confirmHadithOption);
     } catch (err) {
       console.log(err.message);
       await bot.sendMessage(chatId);
@@ -157,6 +158,45 @@ bot.on("authorized_message", async () => {
       console.log(e.message);
       await bot.sendMessage(chatId);
     }
+  });
+
+  // check_your_self command
+  bot.onText(/\/check_your_self/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    await bot.sendMessage(chatId, "Выберите сложность хадиса:", options.dificultLevels);
+    bot.emit("chose_dificult", async (dificult) => {
+      const rates = {
+        1: { max: 300 },
+        2: { max: 500 },
+        3: { min: 700 },
+      };
+
+      const currentRate = rates[dificult];
+      const hadith = await getHadith(currentRate.max, currentRate.min);
+      const hadithText = `${hadith.title}\n\n${hadith.text}`;
+
+      userContexts[chatId] = { hadith };
+
+      await bot.sendMessage(chatId, hadithText, options.ready);
+
+      bot.emit("ready_to_test", async () => {
+        await bot.sendMessage(
+          chatId,
+          "Пожалуйста, отпраьте голосовое сообщение с ответом на вопрос: «Что вы почерпнули из предыдущего хадиса?» За каждое дополнение вы получите баллы."
+        );
+
+        bot.emit("audio_upload", async (filePath) => {
+          const { text: transcribedText } = await openaiController.transcribe(filePath);
+          const response = await openaiController.compareHadith(hadithText, transcribedText);
+          const stats = response.content.split("/");
+          const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%.`;
+          await bot.sendMessage(chatId, text);
+          fs.unlinkSync(filePath);
+        });
+      });
+    });
+    // userContexts[chatId] = { ...userContexts[chatId], waitForAudio: true, msg };
   });
 
   bot.removeListener("authorized_message"); // removing authorized_message emit

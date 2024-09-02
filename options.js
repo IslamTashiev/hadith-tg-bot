@@ -92,6 +92,22 @@ const settingsKeyboard = async (settings) => {
   };
 };
 
+const dificultLevels = {
+  reply_markup: {
+    inline_keyboard: [
+      [{ text: "Легкий 40/60", callback_data: "dificult_1" }],
+      [{ text: "Средний 60/80", callback_data: "dificult_2" }],
+      [{ text: "Сложный 80/100", callback_data: "dificult_3" }],
+    ],
+  },
+};
+
+const ready = {
+  reply_markup: {
+    inline_keyboard: [[{ text: "Готов", callback_data: "ready" }]],
+  },
+};
+
 module.exports = {
   commands,
   hadithMessageOptions,
@@ -102,4 +118,6 @@ module.exports = {
   confirmHadithOption,
   cancelEdit,
   settingsKeyboard,
+  dificultLevels,
+  ready,
 };

@@ -6,10 +6,12 @@ const PatternModel = require("../models/PatternModel");
 const SettingServices = require("../services/setting.service");
 const userContexts = require("./context");
 const bot = require("./instance");
+const fs = require("fs");
 
 const { hadithMessageOptions, everyDayHadithSettings, everyFridayHadithSettings } = require("../options");
 const { getHadithByBook, infoMarkup } = require("../services/hadith.service");
 const { sendPatterns } = require("../services/pattern.service");
+const { default: axios } = require("axios");
 require("dotenv/config");
 
 const token = process.env.TELEGRAM_TOKEN;
@@ -188,6 +190,89 @@ bot.on("change_pattern_setting", async () => {
   };
 
   bot.on("message", messageListener);
+});
+
+// audio_upload emit
+bot.on("audio_upload", async (cb) => {
+  if (messageListener) {
+    bot.removeListener("message", messageListener);
+  }
+
+  messageListener = async (msg) => {
+    const audio = msg.voice;
+    const chatId = msg.chat.id;
+
+    if (audio) {
+      const fileId = audio.file_id;
+
+      try {
+        const file = await bot.getFile(fileId);
+        const fileUrl = `https://api.telegram.org/file/bot${token}/${file.file_path}`;
+        const filePath = `voices/${file.file_unique_id}.mp3`;
+
+        await fs.promises.mkdir("voices", { recursive: true });
+
+        const response = await axios({
+          url: fileUrl,
+          method: "GET",
+          responseType: "stream",
+        });
+
+        const writer = fs.createWriteStream(filePath);
+        response.data.pipe(writer);
+
+        writer.on("finish", () => {
+          console.log(`Файл загружен и сохранен как ${filePath}`);
+          bot.removeListener("message", messageListener);
+          cb(filePath);
+        });
+        writer.on("error", (err) => {
+          console.error("Ошибка при записи файла:", err.message);
+          bot.sendMessage(chatId, "Произошла ошибка при загрузке файла: ", err.message);
+        });
+      } catch (err) {
+        console.error("Ошибка при получении файла:", err.message);
+        bot.sendMessage(chatId, "Произошла ошибка при загрузке файла: ", err.message);
+      }
+    } else {
+      await bot.sendMessage(chatId, "Пожалуйста отправьте голосовое сообщение");
+    }
+  };
+
+  bot.on("message", messageListener);
+});
+
+// chose_dificult emit
+bot.on("chose_dificult", (cb) => {
+  if (callbackListener) bot.removeListener("callback_query", callbackListener);
+
+  callbackListener = async (msg) => {
+    const data = msg.data;
+
+    if (data.startsWith("dificult")) {
+      const dificult = +data.split("_")[1];
+      cb(dificult);
+      await bot.deleteMessage(msg.message.chat.id, msg.message.message_id);
+    }
+  };
+
+  bot.on("callback_query", callbackListener);
+});
+
+// ready_to_test emit
+bot.on("ready_to_test", (cb) => {
+  if (callbackListener) bot.removeListener("callback_query", callbackListener);
+
+  callbackListener = async (msg) => {
+    const data = msg.data;
+
+    if (data === "ready") {
+      await bot.deleteMessage(msg.message.chat.id, msg.message.message_id);
+      cb();
+    }
+  };
+
+  bot.on("callback_query", callbackListener);
 });
 
 bot.on("message", async (msg) => {

@@ -1,4 +1,5 @@
 /audio
+/voices
 /node_modules
 .env
 ig_state.json
