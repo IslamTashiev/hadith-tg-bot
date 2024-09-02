@@ -6,8 +6,8 @@ const sections = require("../data/sections");
 const { getSettings } = require("./setting.service");
 const fs = require("fs");
 
-const getHadith = async (maxLength) => {
-  const hadith = await HadithController.getHadith(maxLength);
+const getHadith = async (maxLength, minLength) => {
+  const hadith = await HadithController.getHadith(maxLength, minLength);
   const author = authors[hadith.author];
   const title = `${author}: ${sections[hadith.book] ?? "Не определено"}`;
 
