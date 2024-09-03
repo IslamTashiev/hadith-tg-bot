@@ -1,7 +1,7 @@
 (() => {
   try {
     const mongoose = require("mongoose");
-    const { everyDaySchedule, everyFridaySchedule } = require("./services/schedule.service");
+    const { everyDaySchedule, everyFridaySchedule, resetUserAttempts } = require("./services/schedule.service");
     require("dotenv").config();
 
     require("./bot/instance");
@@ -16,6 +16,7 @@
 
       await everyDaySchedule();
       await everyFridaySchedule();
+      await resetUserAttempts();
 
       console.log("schedule started...");
     })();

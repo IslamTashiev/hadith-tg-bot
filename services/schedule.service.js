@@ -4,6 +4,9 @@ const { createHadithPhoto, createHadithPhotoByBook } = require("./hadith.service
 const bot = require("../bot/instance");
 const fs = require("fs");
 const { postPhoto } = require("./instagram.service");
+const CheckYourSeflModel = require("../models/CheckYourSeflModel");
+const UserModel = require("../models/UserModel");
+const botText = require("../data/botText");
 require("dotenv/config");
 
 const channelId = process.env.CHANNEL_ID;
@@ -57,4 +60,19 @@ const everyFridaySchedule = async () => {
   return schedule;
 };
 
-module.exports = { everyDaySchedule, everyFridaySchedule };
+const resetUserAttempts = async () => {
+  const schedule = cron.schedule(
+    "10 16 * * *",
+    async () => {
+      await CheckYourSeflModel.updateMany({ usedAttempts: 0 });
+      const users = await UserModel.find({});
+      users.forEach(async (user) => {
+        await bot.sendMessage(user.tgId, botText.counter_reset);
+      });
+    },
+    { scheduled: true }
+  );
+  return schedule;
+};
+
+module.exports = { everyDaySchedule, everyFridaySchedule, resetUserAttempts };
