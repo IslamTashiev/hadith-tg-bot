@@ -37,7 +37,7 @@ const setNewUser = async (msg) => {
 
 const getTopUsers = async () => {
   try {
-    const users = await UserModel.find({ totalScore: -1 }).exec();
+    const users = await UserModel.find().sort({ totalScore: -1 }).exec();
     return users;
   } catch (err) {
     console.log(err.message);

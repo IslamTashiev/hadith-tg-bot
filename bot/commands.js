@@ -11,7 +11,8 @@ const options = require("../options");
 const { settingsMarkup, getSettings } = require("../services/setting.service");
 const { sendPatterns } = require("../services/pattern.service");
 const openaiController = require("../controllers/openai.controller");
-const { setNewUser } = require("../services/user.service");
+const { setNewUser, getTopUsers } = require("../services/user.service");
+const ImageController = require("../controllers/image.controller");
 
 bot.on("authorized_message", async () => {
   // start command
@@ -161,6 +162,19 @@ bot.on("authorized_message", async () => {
     } catch (e) {
       console.log(e.message);
       await bot.sendMessage(chatId);
+    }
+  });
+
+  // tops command
+  bot.onText(/\/tops/, async (msg) => {
+    const chatId = msg.chat.id;
+    try {
+      const topUsers = await getTopUsers();
+      const patternBuffer = await ImageController.getTopUsersImage(topUsers);
+
+      await bot.sendPhoto(chatId, patternBuffer);
+    } catch (err) {
+      console.error(err.message);
     }
   });
 
