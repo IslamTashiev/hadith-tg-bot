@@ -1,6 +1,8 @@
 const bot = require("./instance");
 const botTexts = require("../data/botText");
 const PatternModel = require("../models/PatternModel");
+const UserModel = require("../models/UserModel");
+const CheckYourSeflModel = require("../models/CheckYourSeflModel");
 const userContexts = require("./context");
 const fs = require("fs");
 
@@ -162,40 +164,57 @@ bot.on("authorized_message", async () => {
     }
   });
 
-  // check_your_self command
-  bot.onText(/\/check_your_self/, async (msg) => {
-    const chatId = msg.chat.id;
+  bot.removeListener("authorized_message"); // removing authorized_message emit
+});
 
-    await bot.sendMessage(chatId, botTexts.chose_dificult, options.dificultLevels);
-    bot.emit("chose_dificult", async (dificult) => {
-      const rates = {
-        1: { max: 300 },
-        2: { max: 500 },
-        3: { min: 700 },
-      };
+//! unauthorized commands
+// check_your_self command
+bot.onText(/\/check_your_self/, async (msg) => {
+  const chatId = msg.chat.id;
+  const tgId = msg.from.id;
+  const user = userContexts[chatId]?.currentUser ?? (await UserModel.findOne({ tgId }).populate("checkYourSelf"));
 
-      const currentRate = rates[dificult];
-      const hadith = await getHadith(currentRate.max, currentRate.min);
-      const hadithText = `${hadith.title}\n\n${hadith.text}`;
+  if (user) {
+    const userAttempts = user.checkYourSelf;
+    const isUserAttemptsExists = userAttempts.attemptsPerDay > userAttempts.usedAttempts;
 
-      userContexts[chatId] = { hadith };
+    if (isUserAttemptsExists) {
+      await bot.sendMessage(chatId, botTexts.chose_dificult, options.dificultLevels);
 
-      await bot.sendMessage(chatId, hadithText, options.ready);
+      bot.emit("chose_dificult", async (dificult) => {
+        const rates = {
+          1: { max: 300 },
+          2: { max: 500 },
+          3: { min: 700 },
+        };
 
-      bot.emit("ready_to_test", async () => {
-        await bot.sendMessage(chatId, botTexts.send_voice);
+        const currentRate = rates[dificult];
+        const hadith = await getHadith(currentRate.max, currentRate.min);
+        const hadithText = `${hadith.title}\n\n${hadith.text}`;
 
-        bot.emit("audio_upload", async (filePath) => {
-          const { text: transcribedText } = await openaiController.transcribe(filePath);
-          const response = await openaiController.compareHadith(hadithText, transcribedText);
-          const stats = response.content.split("/");
-          const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%.`;
-          await bot.sendMessage(chatId, text);
-          fs.unlinkSync(filePath);
+        userContexts[chatId] = { hadith };
+
+        await bot.sendMessage(chatId, hadithText, options.ready);
+
+        bot.emit("ready_to_test", async () => {
+          await bot.sendMessage(chatId, botTexts.send_voice);
+
+          bot.emit("audio_upload", async (filePath) => {
+            const { text: transcribedText } = await openaiController.transcribe(filePath);
+            const response = await openaiController.compareHadith(hadithText, transcribedText);
+            const stats = response.content.split("/");
+            const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%.`;
+            await bot.sendMessage(chatId, text);
+            fs.unlinkSync(filePath);
+          });
         });
       });
-    });
-  });
 
-  bot.removeListener("authorized_message"); // removing authorized_message emit
+      await CheckYourSeflModel.findByIdAndUpdate(userAttempts._id, { usedAttempts: userAttempts.usedAttempts + 1 });
+    } else {
+      await bot.sendMessage(chatId, botTexts.attempts_are_gone);
+    }
+  } else {
+    await bot.sendMessage(chatId, botTexts.register_for_continue);
+  }
 });
