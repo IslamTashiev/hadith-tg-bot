@@ -13,7 +13,10 @@ class OpenAIController {
 
     const jsonMessages = await fs.promises.readFile(messagesPath);
     const messages = JSON.parse(jsonMessages);
-    const request = [...messages, { role: "user", content: `${hadithText}\n\n${transcribedText}` }];
+    const request = [
+      ...messages,
+      { role: "user", content: `<original>${hadithText}</original><mytext>${transcribedText}</mytext>` },
+    ];
 
     const chatCompletion = await this.openai.chat.completions.create({ model: this.model, messages: request });
 

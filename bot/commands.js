@@ -183,9 +183,9 @@ bot.onText(/\/check_your_self/, async (msg) => {
 
       bot.emit("chose_dificult", async (dificult) => {
         const rates = {
-          1: { max: 300 },
-          2: { max: 500 },
-          3: { min: 700 },
+          1: { max: 300, ratio: 0.3 },
+          2: { max: 500, ratio: 0.5 },
+          3: { min: 700, ratio: 0.9 },
         };
 
         const currentRate = rates[dificult];
@@ -201,9 +201,11 @@ bot.onText(/\/check_your_self/, async (msg) => {
 
           bot.emit("audio_upload", async (filePath) => {
             const { text: transcribedText } = await openaiController.transcribe(filePath);
-            const response = await openaiController.compareHadith(hadithText, transcribedText);
+            const response = await openaiController.compareHadith(hadith.text, transcribedText);
             const stats = response.content.split("/");
-            const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%.`;
+
+            const score = Math.round((parseInt(stats[1]) * 0.7 + parseInt(stats[0]) * 0.2) * currentRate.ratio);
+            const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%. Вы заработали ${score} очков, эти очки определят вас в топе.`;
             await bot.sendMessage(chatId, text);
             fs.unlinkSync(filePath);
           });

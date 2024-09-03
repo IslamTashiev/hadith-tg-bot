@@ -62,7 +62,7 @@ const everyFridaySchedule = async () => {
 
 const resetUserAttempts = async () => {
   const schedule = cron.schedule(
-    "10 16 * * *",
+    "0 0 * * *",
     async () => {
       await CheckYourSeflModel.updateMany({ usedAttempts: 0 });
       const users = await UserModel.find({});
