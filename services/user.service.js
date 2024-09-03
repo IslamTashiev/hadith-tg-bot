@@ -25,4 +25,13 @@ const setNewUser = async (msg) => {
   userContexts[msg.from.id] = { currentUser: condidate };
 };
 
-module.exports = { setNewUser };
+const getTopUsers = async () => {
+  try {
+    const users = await UserModel.find({ totalScore: -1 }).exec();
+    return users;
+  } catch (err) {
+    console.log(err.message);
+  }
+};
+
+module.exports = { setNewUser, getTopUsers };
