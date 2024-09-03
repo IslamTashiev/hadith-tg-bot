@@ -10,14 +10,10 @@ const authorization = (bot) => {
     const chatId = msg.chat.id;
     const senderId = msg.from.id;
 
-    const condidate = await UserModel.findOne({ tgId: senderId });
-
     // if (!condidate) {
     //   await bot.sendMessage(chatId, "Вы не зарегистрированы, для регистрации воспользуйтесь командой /start");
     //   return;
     // }
-
-    userContexts[chatId] = { currentUser: condidate };
 
     if (!whiteList.includes(senderId)) {
       await bot.sendMessage(chatId, botText.you_cant_use);
@@ -25,6 +21,8 @@ const authorization = (bot) => {
     }
 
     bot.emit("authorized_message", msg);
+    const condidate = await UserModel.findOne({ tgId: senderId }).populate("checkYourSelf");
+    userContexts[chatId] = { currentUser: condidate };
   });
 };
 
