@@ -9,16 +9,18 @@ const options = require("../options");
 const { settingsMarkup, getSettings } = require("../services/setting.service");
 const { sendPatterns } = require("../services/pattern.service");
 const openaiController = require("../controllers/openai.controller");
+const { setNewUser } = require("../services/user.service");
 
 bot.on("authorized_message", async () => {
   // start command
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
     try {
+      await setNewUser(msg);
       await bot.sendMessage(chatId, botTexts.start);
     } catch (e) {
       console.log(e.message);
-      await bot.sendMessage(chatId);
+      await bot.sendMessage(chatId, e.message);
     }
   });
 
