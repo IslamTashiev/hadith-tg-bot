@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema({
   tgId: { type: String, required: true },
   chatId: { type: String, required: true },
   checkYourSelf: { type: mongoose.Types.ObjectId, ref: "CheckYourSelf" },
+  totalScore: { type: Number, default: 0 },
 });
 
 module.exports = mongoose.model("User", UserSchema);

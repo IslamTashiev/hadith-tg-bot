@@ -96,9 +96,9 @@ const settingsKeyboard = async (settings) => {
 const dificultLevels = {
   reply_markup: {
     inline_keyboard: [
-      [{ text: "Легкий 40/60", callback_data: "dificult_1" }],
-      [{ text: "Средний 60/80", callback_data: "dificult_2" }],
-      [{ text: "Сложный 80/100", callback_data: "dificult_3" }],
+      [{ text: "Легкий 45", callback_data: "dificult_1" }],
+      [{ text: "Средний 60", callback_data: "dificult_2" }],
+      [{ text: "Сложный 100", callback_data: "dificult_3" }],
     ],
   },
 };

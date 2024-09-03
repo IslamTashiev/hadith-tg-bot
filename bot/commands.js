@@ -183,9 +183,9 @@ bot.onText(/\/check_your_self/, async (msg) => {
 
       bot.emit("chose_dificult", async (dificult) => {
         const rates = {
-          1: { max: 300, ratio: 0.3 },
-          2: { max: 500, ratio: 0.5 },
-          3: { min: 700, ratio: 0.9 },
+          1: { max: 300, ratio: 0.5 },
+          2: { max: 500, ratio: 0.67 },
+          3: { min: 700, ratio: 1.113 },
         };
 
         const currentRate = rates[dificult];
@@ -205,8 +205,10 @@ bot.onText(/\/check_your_self/, async (msg) => {
             const stats = response.content.split("/");
 
             const score = Math.round((parseInt(stats[1]) * 0.7 + parseInt(stats[0]) * 0.2) * currentRate.ratio);
-            const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%. Вы заработали ${score} очков, эти очки определят вас в топе.`;
-            await bot.sendMessage(chatId, text);
+            const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%. Вы заработали **${score} очков**, эти очки определят вас в топе.`;
+
+            await UserModel.findByIdAndUpdate(user._id, { totalScore: user.totalScore + score });
+            await bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
             fs.unlinkSync(filePath);
           });
         });
