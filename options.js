@@ -12,6 +12,7 @@ const commands = [
   { command: "/remove_pattern", description: "Удалить шаблон" },
   // { command: "/settings", description: "Настройки" },
   { command: "/confirm_hadith", description: "Подтвердить хадис" },
+  { command: "/check_your_self", description: "Проверь свои знания" },
 ];
 
 const hadithMessageOptions = {
