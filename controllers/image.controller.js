@@ -99,6 +99,92 @@ class ImageController {
     await sharp(outputBuffer).toFile(this.outputImagePath);
   }
 
+  static async getTopUsersImage(topUsers) {
+    if (topUsers.length < 3) throw Error("Количество пользователей меньше 3");
+
+    const roundImageCorners = async (imageBuffer, cornerRadius) => {
+      const image = await loadImage(imageBuffer);
+
+      const canvas = createCanvas(image.width, image.height);
+      const ctx = canvas.getContext("2d");
+
+      function drawRoundedImage(ctx, image, x, y, width, height, radius) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+        ctx.clip();
+
+        ctx.drawImage(image, x, y, width, height);
+      }
+
+      drawRoundedImage(ctx, image, 0, 0, image.width, image.height, cornerRadius);
+
+      return canvas.toBuffer();
+    };
+
+    const positions = [
+      { avatarPositions: [451, 315], namePositions: [437, 512], scorePositions: [520, 480] },
+      { avatarPositions: [200, 395], namePositions: [182, 587], scorePositions: [270, 230] },
+      { avatarPositions: [700, 430], namePositions: [677, 625], scorePositions: [770, 730] },
+    ];
+
+    const patternImage = sharp("patterns/top_pattern.png");
+    const metadata = await patternImage.metadata();
+    const { width, height } = metadata;
+
+    const canvas = createCanvas(width, height);
+    const context = canvas.getContext("2d");
+
+    const topThreeUsers = [];
+
+    for (let i = 0; i < 3; i++) {
+      topThreeUsers.push({ ...topUsers[i]._doc, ...positions[i] });
+    }
+
+    const patternBuffer = await patternImage.toBuffer();
+    const img = await loadImage(patternBuffer);
+    context.fillStyle = "#4D4C6F";
+    context.drawImage(img, 0, 0, width, height);
+
+    for (let i = 0; i < topThreeUsers.length; i++) {
+      const topUser = topThreeUsers[i];
+
+      if (topUser.avatar !== "public/default_user.png") {
+        const response = await axios.get(topUser.avatar, { responseType: "arraybuffer" });
+        const avatarBuffer = Buffer.from(response.data, "binary");
+
+        const cornerRadiusAvatar = await roundImageCorners(avatarBuffer, 80);
+
+        const avatarImage = await loadImage(cornerRadiusAvatar);
+        context.drawImage(avatarImage, ...topUser.avatarPositions, 150, 150);
+      } else {
+        const avatarImage = await loadImage(topUser.avatar);
+        context.drawImage(avatarImage, ...topUser.avatarPositions, 150, 150);
+      }
+
+      context.font = "bold 24px 'sans-serif'";
+      context.fillText("@" + topUser.username, ...topUser.namePositions, 190);
+
+      context.font = "bold 40px 'sans-serif'";
+      context.fillText(
+        String(topUser.totalScore),
+        topUser.scorePositions[0] - String(topUser.totalScore).length * 10,
+        870
+      );
+
+      context.font = "regular 32px 'sans-serif'";
+      context.fillText("очков", topUser.scorePositions[1], 900);
+    }
+
+    const outputBuffer = canvas.toBuffer("image/png");
+    return outputBuffer;
+  }
+
   registerLocalFont(fontPath) {
     if (fs.existsSync(fontPath)) {
       try {
