@@ -49,7 +49,7 @@ class TTSController {
 
     const audioBuffer = Buffer.from(response.data.audioContent, "base64");
 
-    const dirPath = path.join(__dirname, "audio");
+    const dirPath = path.join(__dirname, "..", "audio");
     const filePath = path.join(dirPath, `${fileName ?? "output"}.mp3`);
 
     try {
