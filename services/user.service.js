@@ -44,4 +44,12 @@ const getTopUsers = async () => {
   }
 };
 
-module.exports = { setNewUser, getTopUsers };
+const getTopUsersMarkup = (topUsers) => {
+  return topUsers.reduce((acc, el, index) => {
+    let name = `${el?.firstName} ${el?.lastName}`.replace(/none/g, "");
+
+    return acc + `${index + 1}. ${name} @${el.username}  |  ${el.totalScore} очков\n`;
+  }, "");
+};
+
+module.exports = { setNewUser, getTopUsers, getTopUsersMarkup };

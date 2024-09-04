@@ -128,9 +128,9 @@ class ImageController {
     };
 
     const positions = [
-      { avatarPositions: [451, 315], namePositions: [437, 512], scorePositions: [520, 480] },
-      { avatarPositions: [200, 395], namePositions: [182, 587], scorePositions: [270, 230] },
-      { avatarPositions: [700, 430], namePositions: [677, 625], scorePositions: [770, 730] },
+      { avatarPositions: [379, 274], namePositions: [360, 465], scorePositions: [450, 410] },
+      { avatarPositions: [145, 297], namePositions: [130, 490], scorePositions: [215, 175] },
+      { avatarPositions: [613, 297], namePositions: [600, 490], scorePositions: [685, 645] },
     ];
 
     const patternImage = sharp("patterns/top_pattern.png");
@@ -161,10 +161,10 @@ class ImageController {
         const cornerRadiusAvatar = await roundImageCorners(avatarBuffer, 80);
 
         const avatarImage = await loadImage(cornerRadiusAvatar);
-        context.drawImage(avatarImage, ...topUser.avatarPositions, 150, 150);
+        context.drawImage(avatarImage, ...topUser.avatarPositions, 145, 145);
       } else {
         const avatarImage = await loadImage(topUser.avatar);
-        context.drawImage(avatarImage, ...topUser.avatarPositions, 150, 150);
+        context.drawImage(avatarImage, ...topUser.avatarPositions, 145, 145);
       }
 
       context.font = "bold 24px 'sans-serif'";
@@ -173,12 +173,12 @@ class ImageController {
       context.font = "bold 40px 'sans-serif'";
       context.fillText(
         String(topUser.totalScore),
-        topUser.scorePositions[0] - String(topUser.totalScore).length * 10,
-        870
+        topUser.scorePositions[0] - String(topUser.totalScore).length * 12,
+        570
       );
 
       context.font = "regular 32px 'sans-serif'";
-      context.fillText("очков", topUser.scorePositions[1], 900);
+      context.fillText("очков", topUser.scorePositions[1], 600);
     }
 
     const outputBuffer = canvas.toBuffer("image/png");
