@@ -1,5 +1,4 @@
 const sections = require("./data/sections");
-const { getSettings } = require("./services/setting.service");
 
 const commands = [
   { command: "/start", description: "Начать работу с ботом" },
@@ -109,6 +108,11 @@ const ready = {
   },
 };
 
+const unauthorizedCommands = [
+  { command: "/start", description: "Начать работу с ботом" },
+  { command: "/check_your_self", description: "Проверь себя" },
+];
+
 module.exports = {
   commands,
   hadithMessageOptions,
@@ -121,4 +125,5 @@ module.exports = {
   settingsKeyboard,
   dificultLevels,
   ready,
+  unauthorizedCommands,
 };

@@ -15,18 +15,6 @@ const { setNewUser, getTopUsers, getTopUsersMarkup } = require("../services/user
 const ImageController = require("../controllers/image.controller");
 
 bot.on("authorized_message", async () => {
-  // start command
-  bot.onText(/\/start/, async (msg) => {
-    const chatId = msg.chat.id;
-    try {
-      await setNewUser(msg);
-      await bot.sendMessage(chatId, botTexts.start);
-    } catch (e) {
-      console.log(e.message);
-      await bot.sendMessage(chatId, e.message);
-    }
-  });
-
   // send_hadith command
   bot.onText(/\/send_hadith/, async (msg) => {
     const chatId = msg.chat.id;
@@ -183,6 +171,18 @@ bot.on("authorized_message", async () => {
 });
 
 //! unauthorized commands
+// start command
+bot.onText(/\/start/, async (msg) => {
+  const chatId = msg.chat.id;
+  try {
+    // await setNewUser(msg);
+    await bot.sendMessage(chatId, botTexts.start);
+  } catch (e) {
+    console.log(e.message);
+    await bot.sendMessage(chatId, e.message);
+  }
+});
+
 // check_your_self command
 bot.onText(/\/check_your_self/, async (msg) => {
   const chatId = msg.chat.id;
@@ -233,7 +233,5 @@ bot.onText(/\/check_your_self/, async (msg) => {
     } else {
       await bot.sendMessage(chatId, botTexts.attempts_are_gone);
     }
-  } else {
-    await bot.sendMessage(chatId, botTexts.register_for_continue);
   }
 });
