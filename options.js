@@ -111,6 +111,7 @@ const ready = {
 const unauthorizedCommands = [
   { command: "/start", description: "Начать работу с ботом" },
   { command: "/check_your_self", description: "Проверь себя" },
+  { command: "/commands", description: "Доступные команды" },
 ];
 
 module.exports = {

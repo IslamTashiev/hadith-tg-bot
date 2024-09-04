@@ -11,7 +11,7 @@ const options = require("../options");
 const { settingsMarkup, getSettings } = require("../services/setting.service");
 const { sendPatterns } = require("../services/pattern.service");
 const openaiController = require("../controllers/openai.controller");
-const { setNewUser, getTopUsers, getTopUsersMarkup } = require("../services/user.service");
+const { getTopUsers, getTopUsersMarkup, userCommands } = require("../services/user.service");
 const ImageController = require("../controllers/image.controller");
 
 bot.on("authorized_message", async () => {
@@ -234,4 +234,10 @@ bot.onText(/\/check_your_self/, async (msg) => {
       await bot.sendMessage(chatId, botTexts.attempts_are_gone);
     }
   }
+});
+
+bot.onText(/\/commands/, async (msg) => {
+  const chatId = msg.chat.id;
+
+  await bot.sendMessage(chatId, userCommands(msg.from.id));
 });

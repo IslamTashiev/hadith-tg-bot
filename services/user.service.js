@@ -2,6 +2,8 @@ const userContexts = require("../bot/context");
 const bot = require("../bot/instance");
 const CheckYourSeflModel = require("../models/CheckYourSeflModel");
 const UserModel = require("../models/UserModel");
+const { commands, unauthorizedCommands } = require("../options");
+require("dotenv").config();
 
 const setNewUser = async (msg) => {
   const condidate = await UserModel.findOne({ tgId: msg.from.id });
@@ -52,4 +54,10 @@ const getTopUsersMarkup = (topUsers) => {
   }, "");
 };
 
-module.exports = { setNewUser, getTopUsers, getTopUsersMarkup };
+const userCommands = (userId) => {
+  const whiteList = JSON.parse(process.env.WHITE_LIST);
+  const cmd = !whiteList.includes(userId) ? unauthorizedCommands : commands;
+  return cmd.map((cmd) => `${cmd.command} - ${cmd.description}`).join("\n");
+};
+
+module.exports = { setNewUser, getTopUsers, getTopUsersMarkup, userCommands };

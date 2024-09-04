@@ -30,7 +30,6 @@ const authorization = (bot) => {
       return;
     }
 
-    bot.setMyCommands(commands);
     bot.emit("authorized_message", msg);
   });
 };
