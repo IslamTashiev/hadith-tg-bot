@@ -5,7 +5,7 @@
     require("dotenv").config();
 
     require("./bot/instance");
-    require("./bot/commands");
+    // require("./bot/commands");
     require("./bot/emits");
     require("./bot/callbacks");
 

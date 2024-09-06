@@ -1,11 +1,26 @@
 const TelegramBot = require("node-telegram-bot-api");
-const authorization = require("../middlewares/authorization");
 require("dotenv").config();
+const { handlePrivateCommands } = require("./commands");
+const { handlePublicCommands } = require("./publicCommands");
 
 const token = process.env.TELEGRAM_TOKEN;
+const whiteList = JSON.parse(process.env.WHITE_LIST);
 
 const bot = new TelegramBot(token, { polling: true });
 
-authorization(bot);
+let messageListener;
+
+messageListener = (msg) => {
+  const senderId = msg.from.id;
+  handlePublicCommands(bot, msg);
+
+  if (whiteList.includes(senderId)) {
+    handlePrivateCommands(bot, msg);
+  }
+
+  bot.removeListener("message", messageListener);
+};
+
+bot.on("message", messageListener);
 
 module.exports = bot;
