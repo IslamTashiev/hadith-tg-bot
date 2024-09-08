@@ -48,13 +48,13 @@ const getVoiceHadith = async () => {
   const book = sections[hadith.book];
   const title = `${author}: ${sections[hadith.book] ?? "Не определено"}`;
 
-  const audioListJson = await fs.promises.readFile("data/audio.json");
+  const audioListJson = await fs.promises.readFile("static/audio.json");
   const audioList = JSON.parse(audioListJson);
 
   if (!audioList[hadith.id]) {
     const textToSpeech = new TTSController();
     await textToSpeech.tts(changeChar(hadith.text + title), hadith.id);
-    await fs.promises.writeFile(`data/audio.json`, JSON.stringify({ ...audioList, [hadith.id]: hadith.id }));
+    await fs.promises.writeFile(`static/audio.json`, JSON.stringify({ ...audioList, [hadith.id]: hadith.id }));
   }
 
   return { ...hadith, book, author };

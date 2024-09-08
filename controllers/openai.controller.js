@@ -27,7 +27,7 @@ class OpenAIController {
   }
 
   async compareHadith(hadithText, transcribedText) {
-    const messagesPath = "data/messages.json";
+    const messagesPath = "static/messages.json";
 
     const jsonMessages = await fs.promises.readFile(messagesPath);
     const messages = JSON.parse(jsonMessages);
