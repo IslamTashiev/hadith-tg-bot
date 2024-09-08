@@ -1,17 +1,20 @@
 const userContexts = require("../bot/context");
 const bot = require("../bot/instance");
 const CheckYourSeflModel = require("../models/CheckYourSeflModel");
+const QuestionAttempts = require("../models/QuestionAttempts");
 const UserModel = require("../models/UserModel");
 const { commands, unauthorizedCommands } = require("../options");
 require("dotenv").config();
 
-const setNewUser = async (msg) => {
+const setNewUser = async (bot, msg) => {
   const condidate = await UserModel.findOne({ tgId: msg.from.id });
 
   if (!condidate) {
     const attempt = new CheckYourSeflModel({});
     const createdAttempt = await attempt.save();
-    const userProfilePhotos = await bot.getUserProfilePhotos(msg.from.id);
+    const questionAttempts = new QuestionAttempts({});
+    const createdQuestionAttempt = await questionAttempts.save();
+    const userProfilePhotos = await bot?.getUserProfilePhotos(msg.from.id);
     let userAvatar = "public/default_user.png";
 
     if (userProfilePhotos.total_count > 0) {
@@ -27,6 +30,7 @@ const setNewUser = async (msg) => {
       tgId: msg.from.id,
       chatId: msg.chat.id,
       checkYourSelf: createdAttempt._id,
+      questionAttempts: createdQuestionAttempt._id,
       avatar: userAvatar,
     };
     const newUser = new UserModel(data);

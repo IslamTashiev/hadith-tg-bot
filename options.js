@@ -108,9 +108,23 @@ const ready = {
   },
 };
 
+const answers = (answers) => ({
+  reply_markup: {
+    inline_keyboard: answers.map((elem, index) => [
+      {
+        text: elem,
+        callback_data: "answer_" + index,
+      },
+    ]),
+  },
+});
+
 const unauthorizedCommands = [
   { command: "/start", description: "Начать работу с ботом" },
   { command: "/check_your_self", description: "Проверь себя" },
+  { command: "/tops", description: "Показать топы" },
+  { command: "/hadith", description: "Получить хадис" },
+  { command: "/question", description: "Ежедневная викторина" },
   { command: "/commands", description: "Доступные команды" },
 ];
 
@@ -127,4 +141,5 @@ module.exports = {
   dificultLevels,
   ready,
   unauthorizedCommands,
+  answers,
 };

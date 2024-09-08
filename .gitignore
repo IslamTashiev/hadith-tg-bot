@@ -2,6 +2,7 @@
 /voices
 /node_modules
 /patterns
+/static
 .env
 ig_state.json
 googleKeys.json

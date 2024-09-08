@@ -8,6 +8,24 @@ class OpenAIController {
     this.model = "gpt-3.5-turbo";
   }
 
+  async getQuestion(hadith) {
+    const contextPath = "static/questionContext.json";
+    const jsonContext = await fs.promises.readFile(contextPath);
+    const context = JSON.parse(jsonContext);
+    const request = [...context, { role: "user", content: hadith.text }];
+
+    const chatCompletion = await this.openai.chat.completions.create({
+      model: this.model,
+      messages: request,
+    });
+
+    const response = chatCompletion.choices[0].message;
+
+    await fs.promises.writeFile(contextPath, JSON.stringify([...request, response]));
+
+    return response;
+  }
+
   async compareHadith(hadithText, transcribedText) {
     const messagesPath = "data/messages.json";
 

@@ -12,6 +12,8 @@ const { hadithMessageOptions, everyDayHadithSettings, everyFridayHadithSettings 
 const { getHadithByBook, infoMarkup } = require("../services/hadith.service");
 const { sendPatterns } = require("../services/pattern.service");
 const { default: axios } = require("axios");
+const UserModel = require("../models/UserModel");
+const QuestionAttempts = require("../models/QuestionAttempts");
 require("dotenv/config");
 
 const token = process.env.TELEGRAM_TOKEN;
@@ -286,5 +288,24 @@ bot.on("message", async (msg) => {
     await bot.sendMessage(chatId, botText.hadith_updated);
 
     userContexts[chatId] = {};
+  }
+});
+
+bot.on("poll_answer", async (pollAnswer) => {
+  const userId = pollAnswer.user.id;
+  const optionsIds = pollAnswer.option_ids;
+
+  if (userContexts[pollAnswer.poll_id] !== undefined) {
+    if (optionsIds.includes(userContexts[pollAnswer.poll_id].correctAnswerId)) {
+      const user = await UserModel.findOne({ tgId: userId });
+      await QuestionAttempts.findByIdAndUpdate(user.questionAttempts, { $inc: { usedAttempts: 1 } });
+      await bot.sendMessage(userId, "Вы получили 15 баллов за свой ответ.");
+      await UserModel.findOneAndUpdate(
+        { tgId: userId },
+        { $inc: { totalScore: 15 }, $push: { answeredQuestions: userContexts[pollAnswer.poll_id].questionId } }
+      );
+    }
+
+    await bot.deleteMessage(userContexts[pollAnswer.poll_id].chatId, userContexts[pollAnswer.poll_id].poll.message_id);
   }
 });

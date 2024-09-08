@@ -2,6 +2,7 @@ const TelegramBot = require("node-telegram-bot-api");
 require("dotenv").config();
 const { handlePrivateCommands } = require("./commands");
 const { handlePublicCommands } = require("./publicCommands");
+const { unauthorizedCommands } = require("../options");
 
 const token = process.env.TELEGRAM_TOKEN;
 const whiteList = JSON.parse(process.env.WHITE_LIST);
@@ -22,5 +23,6 @@ messageListener = (msg) => {
 };
 
 bot.on("message", messageListener);
+bot.setMyCommands(unauthorizedCommands);
 
 module.exports = bot;
