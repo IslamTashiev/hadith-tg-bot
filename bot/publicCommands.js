@@ -111,9 +111,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
     const chatId = msg.chat.id;
     const tgId = msg.from.id;
     try {
-      const user =
-        userContexts[chatId]?.currentUser ??
-        (await UserModel.findOne({ tgId }).populate("hadiths").populate("questionAttempts"));
+      const user = await UserModel.findOne({ tgId }).populate("hadiths").populate("questionAttempts");
       const userQuestions = await getUserQuestions(user.hadiths, user.answeredQuestions);
 
       userContexts[chatId] = { currentUser: user };
