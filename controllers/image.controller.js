@@ -148,7 +148,7 @@ class ImageController {
 
     const patternBuffer = await patternImage.toBuffer();
     const img = await loadImage(patternBuffer);
-    context.fillStyle = "#4D4C6F";
+    context.fillStyle = "#FAECA8";
     context.drawImage(img, 0, 0, width, height);
 
     for (let i = 0; i < topThreeUsers.length; i++) {
