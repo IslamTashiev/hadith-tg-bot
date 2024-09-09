@@ -149,19 +149,4 @@ module.exports.handlePrivateCommands = (bot, msg) => {
       await bot.sendMessage(chatId);
     }
   });
-
-  // tops command
-  bot.onText(/\/tops/, async (msg) => {
-    const chatId = msg.chat.id;
-    try {
-      const topUsers = await getTopUsers();
-      const patternBuffer = await ImageController.getTopUsersImage(topUsers);
-      const caption = getTopUsersMarkup(topUsers);
-
-      await bot.sendPhoto(chatId, patternBuffer, { caption });
-    } catch (err) {
-      console.log(err);
-      console.error(err.message);
-    }
-  });
 };

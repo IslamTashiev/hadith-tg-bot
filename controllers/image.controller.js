@@ -153,10 +153,14 @@ class ImageController {
 
     for (let i = 0; i < topThreeUsers.length; i++) {
       const topUser = topThreeUsers[i];
-
-      const avatarBuffer = await fs.promises.readFile(topUser.avatar);
-      const cornerRadiusAvatar = await roundImageCorners(avatarBuffer, 80);
-      const avatarImage = await loadImage(cornerRadiusAvatar);
+      let avatarImage = null;
+      try {
+        const avatarBuffer = await fs.promises.readFile(topUser.avatar);
+        const cornerRadiusAvatar = await roundImageCorners(avatarBuffer, 80);
+        avatarImage = await loadImage(cornerRadiusAvatar);
+      } catch (err) {
+        avatarImage = await loadImage("public/default_user.png");
+      }
       context.drawImage(avatarImage, ...topUser.avatarPositions, 145, 145);
 
       context.font = "bold 24px 'sans-serif'";
