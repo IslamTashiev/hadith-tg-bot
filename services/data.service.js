@@ -50,7 +50,11 @@ const configFiles = [
 const createDirectories = () => {
   for (let i = 0; i < directories.length; i++) {
     const directory = directories[i];
-    fs.mkdir(directory, { recursive: true });
+    fs.mkdir(directory, { recursive: true }, (err) => {
+      if (err) {
+        console.error(err);
+      }
+    });
   }
 };
 const createFiles = () => {
