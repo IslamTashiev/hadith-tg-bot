@@ -3,6 +3,7 @@
 /node_modules
 /patterns
 /static
+/useravatars
 .env
 ig_state.json
 googleKeys.json

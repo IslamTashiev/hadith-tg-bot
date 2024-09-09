@@ -154,23 +154,10 @@ class ImageController {
     for (let i = 0; i < topThreeUsers.length; i++) {
       const topUser = topThreeUsers[i];
 
-      if (topUser.avatar !== "public/default_user.png") {
-        try {
-          const response = await axios.get(topUser.avatar, { responseType: "arraybuffer" });
-          const avatarBuffer = Buffer.from(response.data, "binary");
-
-          const cornerRadiusAvatar = await roundImageCorners(avatarBuffer, 80);
-
-          const avatarImage = await loadImage(cornerRadiusAvatar);
-          context.drawImage(avatarImage, ...topUser.avatarPositions, 145, 145);
-        } catch (err) {
-          const avatarImage = await loadImage("public/default_user.png");
-          context.drawImage(avatarImage, ...topUser.avatarPositions, 145, 145);
-        }
-      } else {
-        const avatarImage = await loadImage(topUser.avatar);
-        context.drawImage(avatarImage, ...topUser.avatarPositions, 145, 145);
-      }
+      const avatarBuffer = await fs.promises.readFile(topUser.avatar);
+      const cornerRadiusAvatar = await roundImageCorners(avatarBuffer, 80);
+      const avatarImage = await loadImage(cornerRadiusAvatar);
+      context.drawImage(avatarImage, ...topUser.avatarPositions, 145, 145);
 
       context.font = "bold 24px 'sans-serif'";
       context.fillText("@" + topUser.username, ...topUser.namePositions, 190);

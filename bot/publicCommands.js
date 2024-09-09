@@ -1,3 +1,4 @@
+const ImageController = require("../controllers/image.controller");
 const openaiController = require("../controllers/openai.controller");
 const botTexts = require("../data/botText");
 const CheckYourSeflModel = require("../models/CheckYourSeflModel");
@@ -5,7 +6,7 @@ const UserModel = require("../models/UserModel");
 const options = require("../options");
 const { getHadith } = require("../services/hadith.service");
 const { createQuestion, getUserQuestions } = require("../services/question.service");
-const { userCommands, setNewUser } = require("../services/user.service");
+const { userCommands, setNewUser, getTopUsers, getTopUsersMarkup } = require("../services/user.service");
 const userContexts = require("./context");
 const bot = require("./instance");
 const fs = require("fs");
@@ -15,7 +16,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
     try {
-      await setNewUser(bot, msg);
+      // await setNewUser(bot, msg);
       await bot.sendMessage(chatId, botTexts.start);
     } catch (e) {
       console.log(e.message);
@@ -63,6 +64,21 @@ module.exports.handlePublicCommands = (bot, msg) => {
       } else {
         await bot.sendMessage(chatId, botTexts.attempts_are_gone);
       }
+    }
+  });
+
+  // tops command
+  bot.onText(/\/tops/, async (msg) => {
+    const chatId = msg.chat.id;
+    try {
+      const topUsers = await getTopUsers();
+      const patternBuffer = await ImageController.getTopUsersImage(topUsers);
+      const caption = getTopUsersMarkup(topUsers);
+
+      await bot.sendPhoto(chatId, patternBuffer, { caption });
+    } catch (err) {
+      console.log(err);
+      console.error(err.message);
     }
   });
 

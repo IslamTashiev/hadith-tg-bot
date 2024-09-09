@@ -1,9 +1,11 @@
+const { default: axios } = require("axios");
 const userContexts = require("../bot/context");
 const bot = require("../bot/instance");
 const CheckYourSeflModel = require("../models/CheckYourSeflModel");
 const QuestionAttempts = require("../models/QuestionAttempts");
 const UserModel = require("../models/UserModel");
 const { commands, unauthorizedCommands } = require("../options");
+const fs = require("fs");
 require("dotenv").config();
 
 const setNewUser = async (bot, msg) => {
@@ -20,7 +22,13 @@ const setNewUser = async (bot, msg) => {
     if (userProfilePhotos.total_count > 0) {
       const fileId = userProfilePhotos.photos[0][0].file_id;
       const file = await bot.getFile(fileId);
-      userAvatar = `https://api.telegram.org/file/bot${process.env.TELEGRAM_TOKEN}/${file.file_path}`;
+      const avatarPath = `https://api.telegram.org/file/bot${process.env.TELEGRAM_TOKEN}/${file.file_path}`;
+      const response = await axios.get(avatarPath, { responseType: "arraybuffer" });
+      const uploadedAvatarPath = `useravatars/${fileId}.png`;
+      fs.mkdir("useravatars", { recursive: true });
+      const writer = fs.createWriteStream(uploadedAvatarPath);
+      writer.write(response.data);
+      userAvatar = uploadedAvatarPath;
     }
 
     const data = {
