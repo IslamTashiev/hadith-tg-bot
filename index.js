@@ -1,3 +1,5 @@
+const configureData = require("./services/data.service");
+
 (() => {
   try {
     const mongoose = require("mongoose");
@@ -19,6 +21,8 @@
       await resetUserAttempts();
 
       console.log("schedule started...");
+
+      configureData();
     })();
   } catch (err) {
     console.log("Error: ", err.message);
