@@ -16,7 +16,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
     try {
-      // await setNewUser(bot, msg);
+      await setNewUser(bot, msg);
       await bot.sendMessage(chatId, botTexts.start);
     } catch (e) {
       console.log(e.message);
