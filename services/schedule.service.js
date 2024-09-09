@@ -7,6 +7,7 @@ const { postPhoto } = require("./instagram.service");
 const CheckYourSeflModel = require("../models/CheckYourSeflModel");
 const UserModel = require("../models/UserModel");
 const botText = require("../data/botText");
+const QuestionAttempts = require("../models/QuestionAttempts");
 require("dotenv/config");
 
 const channelId = process.env.CHANNEL_ID;
@@ -65,6 +66,7 @@ const resetUserAttempts = async () => {
     "0 0 * * *",
     async () => {
       await CheckYourSeflModel.updateMany({ usedAttempts: 0 });
+      await QuestionAttempts.updateMany({ usedAttempts: 0 });
       // const users = await UserModel.find({});
       // users.forEach(async (user) => {
       //   await bot.sendMessage(user.tgId, botText.counter_reset);
