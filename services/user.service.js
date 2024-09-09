@@ -25,7 +25,7 @@ const setNewUser = async (bot, msg) => {
       const avatarPath = `https://api.telegram.org/file/bot${process.env.TELEGRAM_TOKEN}/${file.file_path}`;
       const response = await axios.get(avatarPath, { responseType: "arraybuffer" });
       const uploadedAvatarPath = `useravatars/${fileId}.png`;
-      fs.mkdir("useravatars", { recursive: true });
+      fs.mkdir("useravatars", { recursive: true }, (err) => (err ? console.error(err) : null));
       const writer = fs.createWriteStream(uploadedAvatarPath);
       writer.write(response.data);
       userAvatar = uploadedAvatarPath;
