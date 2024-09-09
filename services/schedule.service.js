@@ -65,10 +65,10 @@ const resetUserAttempts = async () => {
     "0 0 * * *",
     async () => {
       await CheckYourSeflModel.updateMany({ usedAttempts: 0 });
-      const users = await UserModel.find({});
-      users.forEach(async (user) => {
-        await bot.sendMessage(user.tgId, botText.counter_reset);
-      });
+      // const users = await UserModel.find({});
+      // users.forEach(async (user) => {
+      //   await bot.sendMessage(user.tgId, botText.counter_reset);
+      // });
     },
     { scheduled: true }
   );
