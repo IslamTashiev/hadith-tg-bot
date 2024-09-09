@@ -10,14 +10,15 @@ const { userCommands, setNewUser, getTopUsers, getTopUsersMarkup } = require("..
 const userContexts = require("./context");
 const bot = require("./instance");
 const fs = require("fs");
-
 module.exports.handlePublicCommands = (bot, msg) => {
   // start command
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
     try {
       await setNewUser(bot, msg);
-      await bot.sendMessage(chatId, botTexts.start);
+      const sticker = fs.readFileSync("public/assalam.webp");
+      await bot.sendSticker(chatId, sticker);
+      await bot.sendMessage(chatId, botTexts.start, { parse_mode: "Markdown" });
     } catch (e) {
       console.log(e.message);
       await bot.sendMessage(chatId, e.message);
