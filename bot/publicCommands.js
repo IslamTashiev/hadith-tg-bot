@@ -145,4 +145,32 @@ module.exports.handlePublicCommands = (bot, msg) => {
       console.log(err.message);
     }
   });
+
+  // get_name command
+  bot.onText(/\/get_name(\s+(\d+))?/, async (msg, match) => {
+    try {
+      const nameIndex = match[2];
+      const chatId = msg.chat.id;
+      const imageController = new ImageController();
+      const namesJson = await fs.promises.readFile("static/namesOfAllah.json");
+      const names = JSON.parse(namesJson);
+      let nameObject = null;
+
+      if (nameIndex) {
+        if (nameIndex > 99) return bot.sendMessage(chatId, botTexts.set_normal_name);
+        nameObject = names[nameIndex - 1];
+      } else {
+        nameObject = names[Math.floor(Math.random() * 99)];
+      }
+
+      const imageBuffer = await imageController.getNameOfAllah(nameObject);
+      const caption = nameObject.detailed_desc;
+      const isCaptionTooLong = caption.length > 1024;
+
+      await bot.sendPhoto(chatId, imageBuffer, isCaptionTooLong ? {} : { caption });
+      isCaptionTooLong ? await bot.sendMessage(chatId, caption) : null;
+    } catch (err) {
+      console.log(err.message);
+    }
+  });
 };

@@ -181,6 +181,50 @@ class ImageController {
     return outputBuffer;
   }
 
+  async getNameOfAllah(nameObject) {
+    const image = sharp("patterns/name_pattern.png");
+    const metadata = await image.metadata();
+    const { width, height } = metadata;
+
+    const canvas = createCanvas(width, height);
+    const context = canvas.getContext("2d");
+    const gradient = context.createLinearGradient(0, 0, width, 0);
+
+    const imgBuffer = await image.toBuffer();
+    const img = await loadImage(imgBuffer);
+    context.drawImage(img, 0, 0, width, height);
+
+    gradient.addColorStop(0, "#FAECA8");
+    gradient.addColorStop(0.4148, "#FAECA8");
+    gradient.addColorStop(0.7153, "#EFC87A");
+    gradient.addColorStop(1, "#EFC87A");
+    context.fillStyle = gradient;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.shadowOffsetX = 0;
+    context.shadowOffsetY = 4;
+    context.shadowBlur = 4;
+    context.shadowColor = "rgba(0, 0, 0, 0.25)";
+    context.font = `bold 54px "sans-serif"`;
+
+    context.fillText(nameObject.arabic_name, width / 2, 90);
+    context.font = `regular 34px "sans-serif"`;
+    context.fillText(nameObject.name, width / 2, 170);
+    context.font = `bold 42px "sans-serif"`;
+
+    const lines = this.wrapText(context, nameObject.description, width * 0.9);
+
+    lines.forEach((line, index) => {
+      context.fillText(line, width / 2, 300 + index * 42 * 1.2);
+    });
+
+    context.font = `regular 24px "sans-serif"`;
+    context.fillText("Quran " + nameObject.found, width / 2, height - 50);
+
+    const outputBuffer = canvas.toBuffer("image/png");
+    return outputBuffer;
+  }
+
   registerLocalFont(fontPath) {
     if (fs.existsSync(fontPath)) {
       try {

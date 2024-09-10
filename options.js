@@ -125,6 +125,7 @@ const unauthorizedCommands = [
   { command: "/tops", description: "Показать топы" },
   { command: "/hadith", description: "Получить хадис" },
   { command: "/question", description: "Ежедневная викторина" },
+  { command: "/get_name", description: "Получить 1 из 99 имен Аллаха" },
   { command: "/commands", description: "Доступные команды" },
 ];
 
