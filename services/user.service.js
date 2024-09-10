@@ -4,7 +4,7 @@ const bot = require("../bot/instance");
 const CheckYourSeflModel = require("../models/CheckYourSeflModel");
 const QuestionAttempts = require("../models/QuestionAttempts");
 const UserModel = require("../models/UserModel");
-const { commands, unauthorizedCommands } = require("../options");
+const { commands } = require("../options");
 const fs = require("fs");
 require("dotenv").config();
 
@@ -68,8 +68,8 @@ const getTopUsersMarkup = (topUsers) => {
 
 const userCommands = (userId) => {
   const whiteList = JSON.parse(process.env.WHITE_LIST);
-  const cmd = !whiteList.includes(userId) ? unauthorizedCommands : commands;
-  return cmd.map((cmd) => `${cmd.command} - ${cmd.description}`).join("\n");
+  const accessCommands = !whiteList.includes(userId) ? commands.filter((cmd) => !cmd.private) : commands;
+  return accessCommands.map((cmd) => `${cmd.command} - ${cmd.description}`).join("\n");
 };
 
 module.exports = { setNewUser, getTopUsers, getTopUsersMarkup, userCommands };

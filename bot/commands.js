@@ -8,13 +8,14 @@ const { getHadith, infoMarkup, getUnConfirmedHadith, getVoiceHadith } = require(
 const options = require("../options");
 const { settingsMarkup, getSettings } = require("../services/setting.service");
 const { sendPatterns } = require("../services/pattern.service");
-const { getTopUsers, getTopUsersMarkup } = require("../services/user.service");
-const ImageController = require("../controllers/image.controller");
+const { checkAuth } = require("../middlewares/checkAuth");
 
 module.exports.handlePrivateCommands = (bot, msg) => {
   // send_hadith command
   bot.onText(/\/send_hadith/, async (msg) => {
     const chatId = msg.chat.id;
+
+    if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
 
     try {
       const hadith = await getHadith();
@@ -33,6 +34,9 @@ module.exports.handlePrivateCommands = (bot, msg) => {
   // sections command
   bot.onText(/\/sections/, async (msg) => {
     const chatId = msg.chat.id;
+
+    if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
+
     try {
       bot.emit("select_section");
       await bot.sendMessage(chatId, botTexts.chose_theme, options.sectionsOption());
@@ -45,6 +49,9 @@ module.exports.handlePrivateCommands = (bot, msg) => {
   // send_photo command
   bot.onText(/\/send_photo/, async (msg) => {
     const chatId = msg.chat.id;
+
+    if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
+
     try {
       await sendPatterns("pattern:ASDF?", chatId);
     } catch (e) {
@@ -56,6 +63,8 @@ module.exports.handlePrivateCommands = (bot, msg) => {
   // set_pattern command
   bot.onText(/\/set_pattern/, async (msg) => {
     const chatId = msg.chat.id;
+
+    if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
 
     try {
       const patterns = await PatternModel.find();
@@ -75,6 +84,8 @@ module.exports.handlePrivateCommands = (bot, msg) => {
   //remove_pattern command
   bot.onText(/\/remove_pattern/, async (msg) => {
     const chatId = msg.chat.id;
+
+    if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
 
     try {
       const patterns = await PatternModel.find();
@@ -97,6 +108,8 @@ module.exports.handlePrivateCommands = (bot, msg) => {
   bot.onText(/\/settings/, async (msg) => {
     const chatId = msg.chat.id;
 
+    if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
+
     try {
       const markup = await settingsMarkup();
       await bot.sendMessage(chatId, markup, { parse_mode: "HTML" });
@@ -111,6 +124,9 @@ module.exports.handlePrivateCommands = (bot, msg) => {
   bot.onText(/\/change_settings/, async (msg) => {
     try {
       const chatId = msg.chat.id;
+
+      if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
+
       const settings = await getSettings();
       const keyboard = await options.settingsKeyboard(settings);
 
@@ -125,6 +141,9 @@ module.exports.handlePrivateCommands = (bot, msg) => {
   // confirm_hadith command
   bot.onText(/\/confirm_hadith/, async (msg) => {
     const chatId = msg.chat.id;
+
+    if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
+
     try {
       const hadith = await getUnConfirmedHadith();
       userContexts[chatId] = { hadith, confirmed: false };
@@ -139,6 +158,9 @@ module.exports.handlePrivateCommands = (bot, msg) => {
   // send_voice command
   bot.onText(/\/send_voice/, async (msg) => {
     const chatId = msg.chat.id;
+
+    if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
+
     try {
       const hadith = await getVoiceHadith();
       const audio = fs.createReadStream(`audio/${hadith.id}.mp3`);

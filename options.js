@@ -1,17 +1,20 @@
 const sections = require("./data/sections");
 
 const commands = [
-  { command: "/start", description: "Начать работу с ботом" },
-  // { command: "/set_time", description: "Указать время отправки ежедневного хадиса" },
-  { command: "/sections", description: "Все секции" },
-  { command: "/send_hadith", description: "Отправить случайный хадис" },
-  { command: "/send_photo", description: "Отправить слуйчайный хадис картинкой" },
-  { command: "/send_voice", description: "Отправить аудио хадис" },
-  { command: "/set_pattern", description: "Загрузить шаблон" },
-  { command: "/remove_pattern", description: "Удалить шаблон" },
-  // { command: "/settings", description: "Настройки" },
-  { command: "/confirm_hadith", description: "Подтвердить хадис" },
-  { command: "/check_your_self", description: "Проверь свои знания" },
+  { command: "/start", description: "Начать работу с ботом", private: false },
+  { command: "/sections", description: "Все секции", private: true },
+  { command: "/send_hadith", description: "Отправить случайный хадис", private: true },
+  { command: "/send_photo", description: "Отправить слуйчайный хадис картинкой", private: true },
+  { command: "/send_voice", description: "Отправить аудио хадис", private: true },
+  { command: "/set_pattern", description: "Загрузить шаблон", private: true },
+  { command: "/remove_pattern", description: "Удалить шаблон", private: true },
+  { command: "/confirm_hadith", description: "Подтвердить хадис", private: true },
+  { command: "/check_your_self", description: "Проверь свои знания", private: false },
+  { command: "/tops", description: "Показать топы", private: false },
+  { command: "/hadith", description: "Получить хадис", private: false },
+  { command: "/question", description: "Ежедневная викторина", private: false },
+  { command: "/get_name", description: "Получить 1 из 99 имен Аллаха", private: false },
+  { command: "/commands", description: "Доступные команды", private: false },
 ];
 
 const hadithMessageOptions = {
@@ -119,16 +122,6 @@ const answers = (answers) => ({
   },
 });
 
-const unauthorizedCommands = [
-  { command: "/start", description: "Начать работу с ботом" },
-  { command: "/check_your_self", description: "Проверь себя" },
-  { command: "/tops", description: "Показать топы" },
-  { command: "/hadith", description: "Получить хадис" },
-  { command: "/question", description: "Ежедневная викторина" },
-  { command: "/get_name", description: "Получить 1 из 99 имен Аллаха" },
-  { command: "/commands", description: "Доступные команды" },
-];
-
 module.exports = {
   commands,
   hadithMessageOptions,
@@ -141,6 +134,5 @@ module.exports = {
   settingsKeyboard,
   dificultLevels,
   ready,
-  unauthorizedCommands,
   answers,
 };
