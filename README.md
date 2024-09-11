@@ -21,6 +21,23 @@ Hadith Telegram Bot (hadith-tg-bot) — это Telegram-бот, созданны
    npm install
 2. Создайте файл .env в корне проекта и добавьте следующие переменные:
    ```bash
-   TELEGRAM_TOKEN=your_telegram_bot_token
-   MONGO_URI=your_mongodb_connection_string
-   ADMIN_CHAT_ID=your_admin_chat_id
+   TELEGRAM_TOKEN=
+   WHITE_LIST=
+   MONGO_URI=
+   IG_USERNAME=
+   IG_PASSWORD=
+   CHANNEL_ID=
+   OPENAI_API_KEY=
+   
+   # google keys
+   GOOGLE_KEY_TYPE=
+   GOOGLE_KEY_PROJECT_ID=
+   GOOGLE_KEY_PRIVATE_KEY_ID=
+   GOOGLE_KEY_PRIVATE_KEY=
+   GOOGLE_KEY_CLIENT_EMAIL=
+   GOOGLE_KEY_CLIENT_ID=
+   GOOGLE_KEY_AUTH_URI=
+   GOOGLE_KEY_TOKEN_URI=
+   GOOGLE_KEY_AUTH_PROVIDER_X509_CERT_URL=
+   GOOGLE_KEY_CLIENT_X509_CERT_URL=
+   GOOGLE_KEY_UNIVERSE_DOMAIN=
