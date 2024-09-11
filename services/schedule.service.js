@@ -28,7 +28,7 @@ const everyDaySchedule = async () => {
         const fileOptions = { filename: "customfilename", contentType: "application/octet-stream" };
 
         await bot.sendPhoto(channelId, photoStream, {}, fileOptions);
-        await postPhoto();
+        // await postPhoto();
       } catch (err) {
         console.log("Error in everyDaySchedule: ", err.message);
       }
