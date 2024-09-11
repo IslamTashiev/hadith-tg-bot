@@ -49,6 +49,24 @@ const setNewUser = async (bot, msg) => {
   userContexts[msg.from.id] = { currentUser: condidate };
 };
 
+const checkUserSubscription = async (bot, userId) => {
+  try {
+    const channelId = process.env.CHANNEL_ID;
+    const chatMember = await bot.getChatMember(channelId, userId);
+
+    const status = chatMember.status;
+
+    if (status === "member" || status === "administrator" || status === "creator") {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error("Ошибка при проверке подписки:", error.message);
+    return false;
+  }
+};
+
 const getTopUsers = async () => {
   try {
     const users = await UserModel.find().sort({ totalScore: -1 }).exec();
@@ -72,4 +90,4 @@ const userCommands = (userId) => {
   return accessCommands.map((cmd) => `${cmd.command} - ${cmd.description}`).join("\n");
 };
 
-module.exports = { setNewUser, getTopUsers, getTopUsersMarkup, userCommands };
+module.exports = { setNewUser, getTopUsers, getTopUsersMarkup, userCommands, checkUserSubscription };

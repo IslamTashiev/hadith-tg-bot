@@ -6,10 +6,17 @@ const UserModel = require("../models/UserModel");
 const options = require("../options");
 const { getHadith } = require("../services/hadith.service");
 const { createQuestion, getUserQuestions } = require("../services/question.service");
-const { userCommands, setNewUser, getTopUsers, getTopUsersMarkup } = require("../services/user.service");
+const {
+  userCommands,
+  setNewUser,
+  getTopUsers,
+  getTopUsersMarkup,
+  checkUserSubscription,
+} = require("../services/user.service");
 const userContexts = require("./context");
 const bot = require("./instance");
 const fs = require("fs");
+require("dotenv").config();
 module.exports.handlePublicCommands = (bot, msg) => {
   // start command
   bot.onText(/\/start/, async (msg) => {
@@ -30,6 +37,11 @@ module.exports.handlePublicCommands = (bot, msg) => {
     const chatId = msg.chat.id;
     const tgId = msg.from.id;
     const user = userContexts[chatId]?.currentUser ?? (await UserModel.findOne({ tgId }).populate("checkYourSelf"));
+    const isSubscribed = await checkUserSubscription(bot, tgId);
+
+    if (!isSubscribed) {
+      return bot.sendMessage(chatId, botTexts.join_us + process.env.CHANNEL_ID);
+    }
 
     if (user) {
       const userAttempts = user.checkYourSelf;
@@ -71,6 +83,12 @@ module.exports.handlePublicCommands = (bot, msg) => {
   // tops command
   bot.onText(/\/tops/, async (msg) => {
     const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const isSubscribed = await checkUserSubscription(bot, userId);
+
+    if (!isSubscribed) {
+      return bot.sendMessage(chatId, botTexts.join_us + process.env.CHANNEL_ID);
+    }
     try {
       const topUsers = await getTopUsers();
       const patternBuffer = await ImageController.getTopUsersImage(topUsers);
@@ -92,7 +110,12 @@ module.exports.handlePublicCommands = (bot, msg) => {
   // hadith command
   bot.onText(/\/hadith/, async (msg) => {
     const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const isSubscribed = await checkUserSubscription(bot, userId);
 
+    if (!isSubscribed) {
+      return bot.sendMessage(chatId, botTexts.join_us + process.env.CHANNEL_ID);
+    }
     try {
       const hadith = await getHadith();
       const user = userContexts[chatId]?.currentUser ?? (await UserModel.findOne({ tgId: msg.from.id }));
@@ -111,6 +134,12 @@ module.exports.handlePublicCommands = (bot, msg) => {
   bot.onText(/\/question/, async (msg) => {
     const chatId = msg.chat.id;
     const tgId = msg.from.id;
+    const userId = msg.from.id;
+    const isSubscribed = await checkUserSubscription(bot, userId);
+
+    if (!isSubscribed) {
+      return bot.sendMessage(chatId, botTexts.join_us + process.env.CHANNEL_ID);
+    }
     try {
       const user = await UserModel.findOne({ tgId }).populate("hadiths").populate("questionAttempts");
       const userQuestions = await getUserQuestions(user.hadiths, user.answeredQuestions);
@@ -148,6 +177,12 @@ module.exports.handlePublicCommands = (bot, msg) => {
 
   // get_name command
   bot.onText(/\/get_name(\s+(\d+))?/, async (msg, match) => {
+    const userId = msg.from.id;
+    const isSubscribed = await checkUserSubscription(bot, userId);
+
+    if (!isSubscribed) {
+      return bot.sendMessage(chatId, botTexts.join_us + process.env.CHANNEL_ID);
+    }
     try {
       const nameIndex = match[2];
       const chatId = msg.chat.id;
