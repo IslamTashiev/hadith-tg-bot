@@ -294,18 +294,21 @@ bot.on("message", async (msg) => {
 bot.on("poll_answer", async (pollAnswer) => {
   const userId = pollAnswer.user.id;
   const optionsIds = pollAnswer.option_ids;
+  const currentPoll = userContexts[pollAnswer.poll_id];
+  if (currentPoll !== undefined) {
+    const hadith = await HadithModel.findById(currentPoll.hadithId);
+    const user = await UserModel.findOne({ tgId: userId });
 
-  if (userContexts[pollAnswer.poll_id] !== undefined) {
-    if (optionsIds.includes(userContexts[pollAnswer.poll_id].correctAnswerId)) {
-      const user = await UserModel.findOne({ tgId: userId });
+    if (optionsIds.includes(currentPoll.correctAnswerId)) {
       await QuestionAttempts.findByIdAndUpdate(user.questionAttempts, { $inc: { usedAttempts: 1 } });
-      await bot.sendMessage(userId, "Вы получили 15 баллов за свой ответ.");
-      await UserModel.findOneAndUpdate(
-        { tgId: userId },
-        { $inc: { totalScore: 15 }, $push: { answeredQuestions: userContexts[pollAnswer.poll_id].questionId } }
-      );
+      await bot.sendMessage(userId, botText.correct_answer + hadith.hadithNumber);
+
+      const answeredQuestions = currentPoll.questionId;
+      await UserModel.findOneAndUpdate({ tgId: userId }, { $inc: { totalScore: 15 }, $push: { answeredQuestions } });
+    } else {
+      await bot.sendMessage(userId, botText.incorrect_answer + hadith.hadithNumber);
     }
 
-    await bot.deleteMessage(userContexts[pollAnswer.poll_id].chatId, userContexts[pollAnswer.poll_id].poll.message_id);
+    await bot.deleteMessage(currentPoll.chatId, currentPoll.poll.message_id);
   }
 });

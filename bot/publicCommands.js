@@ -166,7 +166,13 @@ module.exports.handlePublicCommands = (bot, msg) => {
           is_anonymous: false,
         });
 
-        userContexts[poll.poll.id] = { correctAnswerId, poll, chatId, questionId: question._id };
+        userContexts[poll.poll.id] = {
+          correctAnswerId,
+          poll,
+          chatId,
+          questionId: question._id,
+          hadithId: question.hadith,
+        };
       } else {
         await bot.sendMessage(chatId, botTexts.not_enough);
       }
