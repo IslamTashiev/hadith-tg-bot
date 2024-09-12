@@ -32,6 +32,12 @@ class HadithController {
     return singleHadith;
   }
 
+  static async getHadithById(id) {
+    const hadith = await HadithModel.findOne({ hadithNumber: id });
+    const singleHadith = new HadithDto(hadith);
+    return singleHadith;
+  }
+
   static async getHadithByBook(book) {
     const query = book ? { book } : {};
     const hadith = await HadithModel.findRandom(query, {}, { limit: 1 });

@@ -13,6 +13,13 @@ const getHadith = async (maxLength, minLength) => {
 
   return { ...hadith, title };
 };
+const getHadithById = async (id) => {
+  const hadith = await HadithController.getHadithById(id);
+  const author = authors[hadith.author];
+  const title = `${author}: ${sections[hadith.book] ?? "Не определено"}`;
+
+  return { ...hadith, title };
+};
 const getUnConfirmedHadith = async () => {
   const hadith = await HadithController.getUnConfirmedHadith();
   const author = authors[hadith.author];
@@ -73,4 +80,5 @@ module.exports = {
   infoMarkup,
   getUnConfirmedHadith,
   getVoiceHadith,
+  getHadithById,
 };

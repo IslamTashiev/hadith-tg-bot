@@ -4,7 +4,7 @@ const botTexts = require("../data/botText");
 const CheckYourSeflModel = require("../models/CheckYourSeflModel");
 const UserModel = require("../models/UserModel");
 const options = require("../options");
-const { getHadith } = require("../services/hadith.service");
+const { getHadith, getHadithById } = require("../services/hadith.service");
 const { createQuestion, getUserQuestions } = require("../services/question.service");
 const {
   userCommands,
@@ -108,23 +108,24 @@ module.exports.handlePublicCommands = (bot, msg) => {
   });
 
   // hadith command
-  bot.onText(/\/hadith/, async (msg) => {
+  bot.onText(/\/hadith(?:_(\d+))?/, async (msg, match) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
     const isSubscribed = await checkUserSubscription(bot, userId);
+    const hadithId = match[1];
 
     if (!isSubscribed) {
       return bot.sendMessage(chatId, botTexts.join_us + process.env.CHANNEL_ID);
     }
     try {
-      const hadith = await getHadith();
+      const hadith = hadithId ? await getHadithById(hadithId) : await getHadith();
       const user = userContexts[chatId]?.currentUser ?? (await UserModel.findOne({ tgId: msg.from.id }));
       const hadithText = `${hadith.title}\n\n${hadith.text}`;
-      const userHadiths = [...user.hadiths, hadith.id];
+      const userHadiths = hadithId ? user.hadiths : [...user.hadiths, hadith.id];
 
       await bot.sendMessage(chatId, hadithText);
       await createQuestion(hadith);
-      await UserModel.findOneAndUpdate({ hadiths: userHadiths });
+      await UserModel.findOneAndUpdate({ tgId: userId }, { hadiths: userHadiths });
     } catch (err) {
       console.log(err.message);
     }
@@ -178,6 +179,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
   // get_name command
   bot.onText(/\/get_name(\s+(\d+))?/, async (msg, match) => {
     const userId = msg.from.id;
+    const chatId = msg.chat.id;
     const isSubscribed = await checkUserSubscription(bot, userId);
 
     if (!isSubscribed) {
