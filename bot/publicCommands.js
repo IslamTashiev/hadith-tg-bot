@@ -36,7 +36,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
   bot.onText(/\/check_your_self/, async (msg) => {
     const chatId = msg.chat.id;
     const tgId = msg.from.id;
-    const user = userContexts[chatId]?.currentUser ?? (await UserModel.findOne({ tgId }).populate("checkYourSelf"));
+    const user = await UserModel.findOne({ tgId }).populate("checkYourSelf");
     // const isSubscribed = await checkUserSubscription(bot, tgId);
 
     // if (!isSubscribed) {
@@ -65,7 +65,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
             const stats = response.content.split("/");
 
             const score = Math.round((parseInt(stats[1]) * 0.7 + parseInt(stats[0]) * 0.2) * currentRate.ratio);
-            const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%. Вы заработали **${score} очков**, эти очки определят вас в топе.`;
+            const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%. Вы заработали **${score} очков**, эти очки определят вас в топе. Ссылка на хадис /hadith_${hadith.hadithNumber}`;
 
             await UserModel.findByIdAndUpdate(user._id, { totalScore: user.totalScore + score });
             await bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
