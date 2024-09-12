@@ -70,6 +70,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
             await UserModel.findByIdAndUpdate(user._id, { totalScore: user.totalScore + score });
             await bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
             fs.unlinkSync(filePath);
+            bot.removeListener("audio_upload");
           });
         });
 
