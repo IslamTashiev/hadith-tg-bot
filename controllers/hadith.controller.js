@@ -22,8 +22,8 @@ class HadithController {
     }
 
     const query = {
-      confirmed: true,
-      published: false,
+      // confirmed: true,
+      // published: false,
       ...(lengthConditions.length > 0 && { $and: lengthConditions }),
     };
 
