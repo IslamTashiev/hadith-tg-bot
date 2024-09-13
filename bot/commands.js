@@ -9,6 +9,7 @@ const options = require("../options");
 const { settingsMarkup, getSettings } = require("../services/setting.service");
 const { sendPatterns } = require("../services/pattern.service");
 const { checkAuth } = require("../middlewares/checkAuth");
+const UserModel = require("../models/UserModel");
 
 module.exports.handlePrivateCommands = (bot, msg) => {
   // send_hadith command
