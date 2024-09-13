@@ -65,7 +65,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
             const stats = response.content.split("/");
 
             const score = Math.round((parseInt(stats[1]) * 0.7 + parseInt(stats[0]) * 0.2) * currentRate.ratio);
-            const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%. Вы заработали **${score} очков**, эти очки определят вас в топе. Ссылка на хадис /hadith_${hadith.hadithNumber}`;
+            const text = `Вы уловили суть хадиса на ${stats[0]}%, а совпадение слов составило ${stats[1]}%. Вы заработали **${score} очков**, эти очки определят вас в топе. Ссылка на хадис \/hadith\\_${hadith.hadithNumber}`;
 
             await UserModel.findByIdAndUpdate(user._id, { totalScore: user.totalScore + score });
             await bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
