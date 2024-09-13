@@ -52,7 +52,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
         const hadith = await getHadith(1500, 500);
         const hadithText = `${hadith.title}\n\n${hadith.text}`;
 
-        userContexts[chatId] = { hadith };
+        userContexts[chatId] = { hadith, chatId };
 
         await bot.sendMessage(chatId, hadithText, options.ready);
 

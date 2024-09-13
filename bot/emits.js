@@ -236,9 +236,11 @@ bot.on("audio_upload", async (cb) => {
         console.error("Ошибка при получении файла:", err.message);
         bot.sendMessage(chatId, "Произошла ошибка при загрузке файла: ", err.message);
       }
-    } // else {
-    //   await bot.sendMessage(chatId, "Пожалуйста отправьте голосовое сообщение");
-    // }
+    } else {
+      if (chatId === userContexts[chatId]?.chatId) {
+        await bot.sendMessage(chatId, "Пожалуйста отправьте голосовое сообщение");
+      }
+    }
   };
 
   bot.on("message", messageListener);
