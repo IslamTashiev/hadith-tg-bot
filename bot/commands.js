@@ -188,6 +188,7 @@ module.exports.handlePrivateCommands = (bot, msg) => {
             await bot.sendMessage(user.tgId, text);
           })
         );
+        bot.removeListener("send_message_for_everyone");
       });
     } catch (e) {
       console.log(e.message);
