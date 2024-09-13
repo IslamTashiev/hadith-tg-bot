@@ -314,3 +314,18 @@ bot.on("poll_answer", async (pollAnswer) => {
     await bot.deleteMessage(currentPoll.chatId, currentPoll.poll.message_id);
   }
 });
+
+bot.on("send_message_for_everyone", async (cb) => {
+  let messageListener;
+
+  if (messageListener) {
+    bot.removeListener("message", messageListener);
+  }
+
+  messageListener = async (msg) => {
+    const text = msg.text;
+    cb(text);
+  };
+
+  bot.on("message", messageListener);
+});

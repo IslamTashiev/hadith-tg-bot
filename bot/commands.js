@@ -171,4 +171,26 @@ module.exports.handlePrivateCommands = (bot, msg) => {
       await bot.sendMessage(chatId);
     }
   });
+
+  // send_message_for_everyone command
+  bot.onText(/\/send_message_for_everyone/, async (msg) => {
+    const chatId = msg.chat.id;
+
+    if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
+
+    try {
+      await bot.sendMessage(chatId, "Отправьте сообщение/объявление для пользователей бота");
+      bot.emit("send_message_for_everyone", async (text) => {
+        const users = await UserModel.find();
+        await Promise.all(
+          users.map(async (user) => {
+            await bot.sendMessage(user.tgId, text);
+          })
+        );
+      });
+    } catch (e) {
+      console.log(e.message);
+      await bot.sendMessage(chatId);
+    }
+  });
 };
