@@ -25,7 +25,18 @@ const parseQuestion = (questionText) => {
 
 const saveQuestion = async (hadithId, questionText) => {
   const { answers, correctAnswer, question } = parseQuestion(questionText);
-  const newQuestion = new QuestionModel({ answers, correctAnswer, question, hadith: hadithId });
+
+  const editedAnswers = await Promise.all(
+    answers.map(async (answer) => {
+      if (answer.length >= 100) {
+        return await shortenQuestion(answer);
+      } else {
+        return answer;
+      }
+    })
+  );
+
+  const newQuestion = new QuestionModel({ answers: editedAnswers, correctAnswer, question, hadith: hadithId });
   const createdQuestion = await newQuestion.save();
   return createdQuestion;
 };
@@ -40,6 +51,11 @@ const createQuestion = async (hadith) => {
   const questionText = await openaiController.getQuestion(hadith);
   const createdQuestion = await saveQuestion(hadith.id, questionText.content);
   return createdQuestion;
+};
+
+const shortenQuestion = async (questionText) => {
+  const question = await openaiController.shortenQuestion(questionText);
+  return question;
 };
 
 module.exports = {
