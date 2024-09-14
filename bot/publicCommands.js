@@ -180,6 +180,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
     } catch (err) {
       console.log("Err in 128 publicCommands.js");
       console.log(err.message);
+      await bot.sendMessage(chatId, "Что то пошло не так: " + err.message);
     }
   });
 
