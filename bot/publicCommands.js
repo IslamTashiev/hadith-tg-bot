@@ -119,7 +119,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
     //   return bot.sendMessage(chatId, botTexts.join_us + process.env.CHANNEL_ID);
     // }
     try {
-      const hadith = hadithId ? await getHadithById(hadithId) : await getHadith();
+      const hadith = hadithId ? await getHadithById(hadithId) : await getHadith(2200);
       const user = userContexts[chatId]?.currentUser ?? (await UserModel.findOne({ tgId: msg.from.id }));
       const hadithText = `${hadith.title}\n\n${hadith.text}`;
       const userHadiths = hadithId ? user.hadiths : [...user.hadiths, hadith.id];
