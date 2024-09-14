@@ -1,5 +1,6 @@
 const configureData = require("./services/data.service");
-
+const express = require("express");
+const path = require("path");
 (() => {
   try {
     const mongoose = require("mongoose");
@@ -23,6 +24,13 @@ const configureData = require("./services/data.service");
       console.log("schedule started...");
 
       configureData();
+
+      const app = express();
+      app.listen(55);
+
+      app.get("/", (req, res) => {
+        res.sendFile(path.join(__dirname, "client", "index.html"));
+      });
     })();
   } catch (err) {
     console.log("Error: ", err.message);
