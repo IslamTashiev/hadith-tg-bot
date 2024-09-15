@@ -18,7 +18,7 @@ const parseQuestion = (questionText) => {
 
   return {
     question,
-    answers,
+    answers: [...answers, correctAnswer],
     correctAnswer,
   };
 };

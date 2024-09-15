@@ -4,6 +4,7 @@
 /patterns
 /static
 /useravatars
+/client
 .env
 ig_state.json
 googleKeys.json
