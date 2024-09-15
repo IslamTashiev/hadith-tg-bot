@@ -21,7 +21,7 @@ class OpenAIController {
 
     const response = chatCompletion.choices[0].message;
 
-    await fs.promises.writeFile(contextPath, JSON.stringify([...request, response]));
+    // await fs.promises.writeFile(contextPath, JSON.stringify([...request, response]));
 
     return response;
   }

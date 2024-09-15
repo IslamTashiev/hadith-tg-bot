@@ -25,18 +25,25 @@ const parseQuestion = (questionText) => {
 
 const saveQuestion = async (hadithId, questionText) => {
   const { answers, correctAnswer, question } = parseQuestion(questionText);
+  let correct = correctAnswer;
 
   const editedAnswers = await Promise.all(
     answers.map(async (answer) => {
       if (answer.length >= 100) {
-        return await shortenQuestion(answer);
+        const shortenAnswer = await shortenQuestion(answer);
+
+        if (answer === correctAnswer) {
+          correct = shortenAnswer;
+        }
+
+        return shortenAnswer;
       } else {
         return answer;
       }
     })
   );
 
-  const newQuestion = new QuestionModel({ answers: editedAnswers, correctAnswer, question, hadith: hadithId });
+  const newQuestion = new QuestionModel({ answers: editedAnswers, correctAnswer: correct, question, hadith: hadithId });
   const createdQuestion = await newQuestion.save();
   return createdQuestion;
 };
