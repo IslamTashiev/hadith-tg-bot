@@ -120,7 +120,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
     // }
     try {
       const hadith = hadithId ? await getHadithById(hadithId) : await getHadith(2200);
-      const user = userContexts[chatId]?.currentUser ?? (await UserModel.findOne({ tgId: msg.from.id }));
+      const user = await UserModel.findOne({ tgId: msg.from.id });
       const hadithText = `${hadith.title}\n\n${hadith.text}`;
       const userHadiths = hadithId ? user.hadiths : [...user.hadiths, hadith.id];
 
@@ -181,6 +181,23 @@ module.exports.handlePublicCommands = (bot, msg) => {
       console.log("Err in 128 publicCommands.js");
       console.log(err.message);
       await bot.sendMessage(chatId, "Что то пошло не так: " + err.message);
+    }
+  });
+
+  //quran command
+  bot.onText(/\/surah(?:_(\d+))?(?:_([a-zA-Z]+))?/, async (msg, match) => {
+    const chatId = msg.chat.id;
+    const surahNumber = match[1] || Math.floor(Math.random() * 114) + 1;
+    const reader = match[2] || "mishar";
+
+    try {
+      const surahPath = `quran/${reader}/quran_${surahNumber}.mp3`;
+      const surah = fs.createReadStream(surahPath);
+      const loader = await bot.sendMessage(chatId, "Подготовка файла...");
+      await bot.sendAudio(chatId, surah);
+      await bot.deleteMessage(chatId, loader.message_id);
+    } catch (err) {
+      console.log(err.message);
     }
   });
 

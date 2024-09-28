@@ -5,6 +5,7 @@
 /static
 /useravatars
 /client
+/quran
 .env
 ig_state.json
 googleKeys.json

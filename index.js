@@ -33,6 +33,6 @@ const path = require("path");
       });
     })();
   } catch (err) {
-    console.log("Error: ", err.message);
+    console.log("Error: ", err);
   }
 })();
