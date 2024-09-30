@@ -81,7 +81,7 @@ bot.on("change_pattern_setting", async () => {
     switch (text) {
       case "default_pattern": {
         const callbackData = "default_pattern:ASDF?";
-        await sendPatterns(callbackData, chatId);
+        await sendPatterns(callbackData, chatId, bot);
 
         if (callbackListener) bot.removeListener("callback_query", callbackListener);
 

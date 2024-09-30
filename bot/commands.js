@@ -54,7 +54,7 @@ module.exports.handlePrivateCommands = (bot, msg) => {
     if (checkAuth(msg)) return bot.sendMessage(chatId, "Вы не можете пользоваться командой " + msg.text);
 
     try {
-      await sendPatterns("pattern:ASDF?", chatId);
+      await sendPatterns("pattern:ASDF?", chatId, bot);
     } catch (e) {
       console.log(e.message);
       await bot.sendMessage(chatId);
