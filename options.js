@@ -14,6 +14,10 @@ const commands = [
   { command: "/hadith", description: "Получить хадис", private: false },
   { command: "/question", description: "Ежедневная викторина", private: false },
   { command: "/get_name", description: "Получить 1 из 99 имен Аллаха", private: false },
+  { command: "/surah", description: "Получить суру", private: false },
+  { command: "/listen_surah", description: "Получить суру с уточненным аятом.", private: false },
+  { command: "/read_surah", description: "Получить суру с уточненным аятом в виде текста.", private: false },
+  { command: "/quran", description: "Список всех сур.", private: false },
   { command: "/commands", description: "Доступные команды", private: false },
 ];
 
@@ -43,6 +47,15 @@ const hadithPhotoOptions = {
 const sectionsOption = () => ({
   reply_markup: {
     keyboard: Object.values(sections).map((item, index) => [{ text: item, callback_data: index }]),
+    one_time_keyboard: true,
+  },
+});
+
+const chaptersOption = (chapters) => ({
+  reply_markup: {
+    keyboard: chapters.map((item, index) => [
+      { text: `${item.translation} (${item.id}:${item.total_verses})`, callback_data: index },
+    ]),
     one_time_keyboard: true,
   },
 });
@@ -135,4 +148,5 @@ module.exports = {
   dificultLevels,
   ready,
   answers,
+  chaptersOption,
 };

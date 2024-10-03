@@ -6,6 +6,7 @@ const UserModel = require("../models/UserModel");
 const options = require("../options");
 const { getHadith, getHadithById } = require("../services/hadith.service");
 const { createQuestion, getUserQuestions } = require("../services/question.service");
+const { mergeMultipleAudioFiles } = require("../services/quran.service");
 const {
   userCommands,
   setNewUser,
@@ -198,6 +199,124 @@ module.exports.handlePublicCommands = (bot, msg) => {
       await bot.deleteMessage(chatId, loader.message_id);
     } catch (err) {
       console.log(err.message);
+    }
+  });
+
+  //ayah command
+  bot.onText(/\/listen_surah_(\d+)_ayah_(\d+)(?:_to_(\d+))?$/, async (msg, match) => {
+    const chatId = msg.chat.id;
+    const surah = Number(match[1]);
+    const ayahStart = Number(match[2]);
+    const ayahEnd = Number(match[3]) || ayahStart;
+    const pathToSurah = `quran/yasser_by_ayah/${surah.toString().padStart(3, "0")}`;
+    let statusMessageId;
+
+    try {
+      const statusMessage = await bot.sendMessage(chatId, "🔍: проверка файлов...");
+      statusMessageId = statusMessage.message_id;
+
+      await fs.promises.access(pathToSurah);
+
+      const surahInfoJson = await fs.promises.readFile(`${pathToSurah}/info.json`);
+      const surahInfo = JSON.parse(surahInfoJson);
+
+      if (surahInfo.metadata.total_verses < ayahEnd) {
+        return await bot.editMessageText(
+          `Пожалуйста, укажите корректный аят суры - *${surahInfo.metadata.translation}*, начиная с 1 до ${surahInfo.metadata.total_verses}`,
+          { chat_id: chatId, message_id: statusMessageId, parse_mode: "Markdown" }
+        );
+      }
+
+      await bot.editMessageText("📂: подготовка файлов...", { chat_id: chatId, message_id: statusMessageId });
+
+      const ayahs = [];
+
+      for (let i = ayahStart; i <= ayahEnd; i++) {
+        const ayahPath = `${pathToSurah}/${i.toString().padStart(3, "0")}.mp3`;
+
+        try {
+          await fs.promises.access(ayahPath);
+          ayahs.push({
+            path: ayahPath,
+            verse: surahInfo.ayahs[i - 1],
+          });
+        } catch (err) {
+          console.error(`Файл аята не найден: ${ayahPath}`);
+          return await bot.editMessageText(`Файл аята не найден: ${i}`, {
+            chat_id: chatId,
+            message_id: statusMessageId,
+          });
+        }
+      }
+
+      await bot.editMessageText("🔄: слияние файлов...", { chat_id: chatId, message_id: statusMessageId });
+
+      const ayahsBuffer =
+        ayahEnd === surahInfo.metadata.total_verses
+          ? await fs.promises.readFile(`quran/yasser/quran_${surah}.mp3`)
+          : await mergeMultipleAudioFiles(ayahs.map((el) => el.path));
+
+      await bot.editMessageText("✈️: отправка файла...", { chat_id: chatId, message_id: statusMessageId });
+
+      await bot.sendAudio(chatId, ayahsBuffer);
+      await bot.sendMessage(chatId, ayahs.map((el) => `${el.verse.verse}. ${el.verse.text}`).join("\n"));
+
+      await bot.editMessageText("Файл успешно отправлен! ✅", { chat_id: chatId, message_id: statusMessageId });
+    } catch (err) {
+      console.error(err);
+      await bot.editMessageText("Пожалуйста, укажите точную суру, начиная с 1 и заканчивая 114.", {
+        chat_id: chatId,
+        message_id: statusMessageId,
+      });
+    }
+  });
+
+  //only ayah text command
+  bot.onText(/\/read_surah_(\d+)_ayah_(\d+)(?:_to_(\d+))?$/, async (msg, match) => {
+    const chatId = msg.chat.id;
+    const surah = Number(match[1]);
+    const ayahStart = Number(match[2]);
+    const ayahEnd = Number(match[3]) || ayahStart;
+
+    const pathToSurahInfo = `quran/yasser_by_ayah/${surah.toString().padStart(3, "0")}/info.json`;
+
+    try {
+      await fs.promises.access(pathToSurahInfo);
+      const surahInfoJson = await fs.promises.readFile(pathToSurahInfo);
+      const surahInfo = JSON.parse(surahInfoJson);
+
+      const ayahs = [];
+
+      for (let i = ayahStart; i <= ayahEnd; i++) {
+        ayahs.push(surahInfo.ayahs[i - 1]);
+      }
+      const ayahsText = ayahs.map((el) => `${el.verse}. ${el.text}`).join("\n");
+      const chunks = [];
+      for (let i = 0; i < ayahsText.length; i += 4096) {
+        chunks.push(ayahsText.substring(i, i + 4096));
+      }
+      for (const chunk of chunks) {
+        await bot.sendMessage(chatId, chunk);
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+  });
+
+  bot.on("message", async (msg) => {
+    const chatId = msg.chat.id;
+
+    if (msg.text === "/listen_surah") {
+      bot.sendMessage(
+        chatId,
+        "Пожалуйста, предоставьте более подробную информацию: укажите номер суры и номера аятов. Пример: /listen_surah_1_ayah_1_to_7 или /listen_surah_1_ayah_1"
+      );
+    }
+    if (msg.text === "/read_surah") {
+      bot.sendMessage(
+        chatId,
+        "Пожалуйста, предоставьте более подробную информацию: укажите номер суры и номера аятов. Пример: /read_surah_1_ayah_1_to_7 или /read_surah_1_ayah_1"
+      );
     }
   });
 
