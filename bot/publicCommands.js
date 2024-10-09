@@ -224,13 +224,14 @@ module.exports.handlePublicCommands = (bot, msg) => {
   });
 
   //only ayah text command
-  bot.onText(/\/read_surah_(\d+)_ayah_(\d+)(?:_to_(\d+))?$/, async (msg, match) => {
+  bot.onText(/\/read_surah_(\d+)_ayah_(\d+)(?:_to_(\d+))?(?:_(text|arabic_text))?$/, async (msg, match) => {
     const chatId = msg.chat.id;
     const surah = Number(match[1]);
     const ayahStart = Number(match[2]);
     const ayahEnd = Number(match[3]) || ayahStart;
+    const type = match[4];
 
-    const { chunks, header } = await getSurahText(surah, ayahStart, ayahEnd);
+    const { chunks, header } = await getSurahText(surah, ayahStart, ayahEnd, type);
 
     await bot.sendMessage(chatId, header, { parse_mode: "Markdown" });
     for (const chunk of chunks) {
