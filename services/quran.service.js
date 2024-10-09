@@ -90,10 +90,11 @@ const getSurahAudio = async (surahNumber, startAyah, endAyah, changeStatus) => {
     const surahInfo = JSON.parse(surahInfoJson);
     const surahMetadata = surahInfo.metadata;
 
-    if (surahMetadata.total_verses < endAyah) {
-      throw Error(
+    if (surahMetadata.total_verses < endAyah || startAyah <= 0) {
+      await changeStatus(
         `Пожалуйста, укажите корректный аят суры - *${surahInfo.metadata.translation}*, начиная с 1 до ${surahInfo.metadata.total_verses}`
       );
+      return { errors: true };
     }
 
     await changeStatus("📂: подготовка файлов...");

@@ -208,12 +208,13 @@ module.exports.handlePublicCommands = (bot, msg) => {
         const message = await bot.sendMessage(chatId, status);
         statusMessageId = message.message_id;
       } else {
-        await bot.editMessageText(status, { chat_id: chatId, message_id: statusMessageId });
+        await bot.editMessageText(status, { chat_id: chatId, message_id: statusMessageId, parse_mode: "Markdown" });
       }
     };
 
-    const { ayahsBuffer, chunks, header } = await getSurahAudio(surah, ayahStart, ayahEnd, handleChangeStatus);
+    const { ayahsBuffer, chunks, header, errors } = await getSurahAudio(surah, ayahStart, ayahEnd, handleChangeStatus);
 
+    if (errors) return;
     await bot.editMessageText(header, { chat_id: chatId, message_id: statusMessageId, parse_mode: "Markdown" });
     await bot.sendAudio(chatId, ayahsBuffer);
 
