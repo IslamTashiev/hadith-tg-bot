@@ -19,7 +19,7 @@ const mergeMultipleAudioFiles = (inputFiles, surahMetadata) => {
         const audioBuffer = Buffer.concat(buffers);
         const tags = {
           title: `${surahMetadata.transliteration} ayahs ${surahMetadata.verses}`,
-          artist: "Yasser Ad-Dussary",
+          artist: "Yasser Al Dossari",
           album: "Quran",
         };
         const taggedAudioBuffer = NodeID3.write(tags, audioBuffer);
