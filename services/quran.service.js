@@ -80,6 +80,7 @@ const getSurahAudio = async (surahNumber, startAyah, endAyah, changeStatus) => {
   const mainPath = "quran/yasser_by_ayah";
   const surahPath = `${mainPath}/${surahNumber.toString().padStart(3, "0")}`;
   const surahText = await getSurahText(surahNumber, startAyah, endAyah, "text");
+  const bismillahPath = `${mainPath}/b/b.mp3`;
 
   try {
     await changeStatus("🔍: проверка файлов...");
@@ -97,7 +98,7 @@ const getSurahAudio = async (surahNumber, startAyah, endAyah, changeStatus) => {
 
     await changeStatus("📂: подготовка файлов...");
 
-    let ayahs = [];
+    let ayahs = surahNumber == 1 && startAyah == 1 ? [] : [bismillahPath];
 
     for (let i = startAyah; i <= endAyah; i++) {
       const ayahPath = `${surahPath}/${i.toString().padStart(3, "0")}.mp3`;
