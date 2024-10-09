@@ -6,16 +6,9 @@ const UserModel = require("../models/UserModel");
 const options = require("../options");
 const { getHadith, getHadithById } = require("../services/hadith.service");
 const { createQuestion, getUserQuestions } = require("../services/question.service");
-const { mergeMultipleAudioFiles, getSurahText } = require("../services/quran.service");
-const {
-  userCommands,
-  setNewUser,
-  getTopUsers,
-  getTopUsersMarkup,
-  checkUserSubscription,
-} = require("../services/user.service");
+const { getSurahText, getSurahAudio } = require("../services/quran.service");
+const { userCommands, setNewUser, getTopUsers, getTopUsersMarkup } = require("../services/user.service");
 const userContexts = require("./context");
-const bot = require("./instance");
 const fs = require("fs");
 require("dotenv").config();
 module.exports.handlePublicCommands = (bot, msg) => {
@@ -208,66 +201,24 @@ module.exports.handlePublicCommands = (bot, msg) => {
     const surah = Number(match[1]);
     const ayahStart = Number(match[2]);
     const ayahEnd = Number(match[3]) || ayahStart;
-    const pathToSurah = `quran/yasser_by_ayah/${surah.toString().padStart(3, "0")}`;
     let statusMessageId;
 
-    try {
-      const statusMessage = await bot.sendMessage(chatId, "🔍: проверка файлов...");
-      statusMessageId = statusMessage.message_id;
-
-      await fs.promises.access(pathToSurah);
-
-      const surahInfoJson = await fs.promises.readFile(`${pathToSurah}/info.json`);
-      const surahInfo = JSON.parse(surahInfoJson);
-
-      if (surahInfo.metadata.total_verses < ayahEnd) {
-        return await bot.editMessageText(
-          `Пожалуйста, укажите корректный аят суры - *${surahInfo.metadata.translation}*, начиная с 1 до ${surahInfo.metadata.total_verses}`,
-          { chat_id: chatId, message_id: statusMessageId, parse_mode: "Markdown" }
-        );
+    const handleChangeStatus = async (status) => {
+      if (!statusMessageId) {
+        const message = await bot.sendMessage(chatId, status);
+        statusMessageId = message.message_id;
+      } else {
+        await bot.editMessageText(status, { chat_id: chatId, message_id: statusMessageId });
       }
+    };
 
-      await bot.editMessageText("📂: подготовка файлов...", { chat_id: chatId, message_id: statusMessageId });
+    const { ayahsBuffer, chunks, header } = await getSurahAudio(surah, ayahStart, ayahEnd, handleChangeStatus);
 
-      const ayahs = [];
+    await bot.editMessageText(header, { chat_id: chatId, message_id: statusMessageId, parse_mode: "Markdown" });
+    await bot.sendAudio(chatId, ayahsBuffer);
 
-      for (let i = ayahStart; i <= ayahEnd; i++) {
-        const ayahPath = `${pathToSurah}/${i.toString().padStart(3, "0")}.mp3`;
-
-        try {
-          await fs.promises.access(ayahPath);
-          ayahs.push({
-            path: ayahPath,
-            verse: surahInfo.ayahs[i - 1],
-          });
-        } catch (err) {
-          console.error(`Файл аята не найден: ${ayahPath}`);
-          return await bot.editMessageText(`Файл аята не найден: ${i}`, {
-            chat_id: chatId,
-            message_id: statusMessageId,
-          });
-        }
-      }
-
-      await bot.editMessageText("🔄: слияние файлов...", { chat_id: chatId, message_id: statusMessageId });
-
-      const ayahsBuffer =
-        ayahEnd === surahInfo.metadata.total_verses && ayahStart === 1
-          ? await fs.promises.readFile(`quran/yasser/quran_${surah}.mp3`)
-          : await mergeMultipleAudioFiles(ayahs.map((el) => el.path));
-
-      await bot.editMessageText("✈️: отправка файла...", { chat_id: chatId, message_id: statusMessageId });
-
-      await bot.sendAudio(chatId, ayahsBuffer);
-      await bot.sendMessage(chatId, ayahs.map((el) => `${el.verse.verse}. ${el.verse.text}`).join("\n"));
-
-      await bot.editMessageText("Файл успешно отправлен! ✅", { chat_id: chatId, message_id: statusMessageId });
-    } catch (err) {
-      console.error(err);
-      await bot.editMessageText("Пожалуйста, укажите точную суру, начиная с 1 и заканчивая 114.", {
-        chat_id: chatId,
-        message_id: statusMessageId,
-      });
+    for (const chunk of chunks) {
+      await bot.sendMessage(chatId, chunk);
     }
   });
 

@@ -76,7 +76,56 @@ const getSurahText = async (surahNumber, startAyah, endAyah, ln = "text") => {
   }
 };
 
+const getSurahAudio = async (surahNumber, startAyah, endAyah, changeStatus) => {
+  const mainPath = "quran/yasser_by_ayah";
+  const surahPath = `${mainPath}/${surahNumber.toString().padStart(3, "0")}`;
+  const surahText = await getSurahText(surahNumber, startAyah, endAyah, "text");
+
+  try {
+    await changeStatus("🔍: проверка файлов...");
+
+    await fs.promises.access(surahPath);
+    const surahInfoJson = fs.readFileSync(`${surahPath}/info.json`, "utf8");
+    const surahInfo = JSON.parse(surahInfoJson);
+    const surahMetadata = surahInfo.metadata;
+
+    if (surahMetadata.total_verses < endAyah) {
+      throw Error(
+        `Пожалуйста, укажите корректный аят суры - *${surahInfo.metadata.translation}*, начиная с 1 до ${surahInfo.metadata.total_verses}`
+      );
+    }
+
+    await changeStatus("📂: подготовка файлов...");
+
+    let ayahs = [];
+
+    for (let i = startAyah; i <= endAyah; i++) {
+      const ayahPath = `${surahPath}/${i.toString().padStart(3, "0")}.mp3`;
+      try {
+        await fs.promises.access(ayahPath);
+        ayahs.push(ayahPath);
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+
+    await changeStatus("🔄: слияние файлов...");
+
+    const ayahsBuffer =
+      endAyah === surahMetadata && startAyah === 1
+        ? await fs.promises.readFile(`quran/yasser/quran_${surah}.mp3`)
+        : await mergeMultipleAudioFiles(ayahs.map((el) => el));
+
+    await changeStatus("✈️: отправка файла...");
+
+    return { ayahsBuffer, ...surahText };
+  } catch (err) {
+    console.log(err.message);
+  }
+};
+
 module.exports = {
   mergeMultipleAudioFiles,
   getSurahText,
+  getSurahAudio,
 };
