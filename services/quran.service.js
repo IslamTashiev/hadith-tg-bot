@@ -1,8 +1,9 @@
 const ffmpeg = require("fluent-ffmpeg");
 const { PassThrough } = require("stream");
 const fs = require("fs");
+const NodeID3 = require("node-id3");
 
-const mergeMultipleAudioFiles = (inputFiles) => {
+const mergeMultipleAudioFiles = (inputFiles, surahMetadata) => {
   return new Promise((resolve, reject) => {
     const command = ffmpeg();
     const bufferStream = new PassThrough();
@@ -16,7 +17,13 @@ const mergeMultipleAudioFiles = (inputFiles) => {
     command
       .on("end", () => {
         const audioBuffer = Buffer.concat(buffers);
-        resolve(audioBuffer);
+        const tags = {
+          title: `${surahMetadata.transliteration} ayahs ${surahMetadata.verses}`,
+          artist: "Yasser Ad-Dussary",
+          album: "Quran",
+        };
+        const taggedAudioBuffer = NodeID3.write(tags, audioBuffer);
+        resolve(taggedAudioBuffer);
       })
       .on("error", (err) => {
         reject(err);
@@ -88,7 +95,7 @@ const getSurahAudio = async (surahNumber, startAyah, endAyah, changeStatus) => {
     await fs.promises.access(surahPath);
     const surahInfoJson = fs.readFileSync(`${surahPath}/info.json`, "utf8");
     const surahInfo = JSON.parse(surahInfoJson);
-    const surahMetadata = surahInfo.metadata;
+    const surahMetadata = { ...surahInfo.metadata, verses: `${startAyah}-${endAyah}` };
 
     if (surahMetadata.total_verses < endAyah || startAyah <= 0) {
       await changeStatus(
@@ -116,7 +123,10 @@ const getSurahAudio = async (surahNumber, startAyah, endAyah, changeStatus) => {
     const ayahsBuffer =
       endAyah === surahMetadata && startAyah === 1
         ? await fs.promises.readFile(`quran/yasser/quran_${surah}.mp3`)
-        : await mergeMultipleAudioFiles(ayahs.map((el) => el));
+        : await mergeMultipleAudioFiles(
+            ayahs.map((el) => el),
+            surahMetadata
+          );
 
     await changeStatus("✈️: отправка файла...");
 
