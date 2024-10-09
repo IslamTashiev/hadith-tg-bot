@@ -6,7 +6,7 @@ const UserModel = require("../models/UserModel");
 const options = require("../options");
 const { getHadith, getHadithById } = require("../services/hadith.service");
 const { createQuestion, getUserQuestions } = require("../services/question.service");
-const { mergeMultipleAudioFiles } = require("../services/quran.service");
+const { mergeMultipleAudioFiles, getSurahText } = require("../services/quran.service");
 const {
   userCommands,
   setNewUser,
@@ -278,28 +278,11 @@ module.exports.handlePublicCommands = (bot, msg) => {
     const ayahStart = Number(match[2]);
     const ayahEnd = Number(match[3]) || ayahStart;
 
-    const pathToSurahInfo = `quran/yasser_by_ayah/${surah.toString().padStart(3, "0")}/info.json`;
+    const { chunks, header } = await getSurahText(surah, ayahStart, ayahEnd);
 
-    try {
-      await fs.promises.access(pathToSurahInfo);
-      const surahInfoJson = await fs.promises.readFile(pathToSurahInfo);
-      const surahInfo = JSON.parse(surahInfoJson);
-
-      const ayahs = [];
-
-      for (let i = ayahStart; i <= ayahEnd; i++) {
-        ayahs.push(surahInfo.ayahs[i - 1]);
-      }
-      const ayahsText = ayahs.map((el) => `${el.verse}. ${el.text}`).join("\n");
-      const chunks = [];
-      for (let i = 0; i < ayahsText.length; i += 4096) {
-        chunks.push(ayahsText.substring(i, i + 4096));
-      }
-      for (const chunk of chunks) {
-        await bot.sendMessage(chatId, chunk);
-      }
-    } catch (err) {
-      console.log(err.message);
+    await bot.sendMessage(chatId, header, { parse_mode: "Markdown" });
+    for (const chunk of chunks) {
+      await bot.sendMessage(chatId, chunk);
     }
   });
 
