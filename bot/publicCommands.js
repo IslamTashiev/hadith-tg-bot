@@ -252,7 +252,7 @@ module.exports.handlePublicCommands = (bot, msg) => {
       await bot.editMessageText("🔄: слияние файлов...", { chat_id: chatId, message_id: statusMessageId });
 
       const ayahsBuffer =
-        ayahEnd === surahInfo.metadata.total_verses
+        ayahEnd === surahInfo.metadata.total_verses && ayahStart === 1
           ? await fs.promises.readFile(`quran/yasser/quran_${surah}.mp3`)
           : await mergeMultipleAudioFiles(ayahs.map((el) => el.path));
 
