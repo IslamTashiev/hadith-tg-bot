@@ -65,6 +65,12 @@ const getSurahText = async (surahNumber, startAyah, endAyah, ln = "text") => {
     const bismillahInfo = JSON.parse(bismillahInfoJson);
     const surahMetadata = surahInfo.metadata;
 
+    if (surahMetadata.total_verses < endAyah || startAyah <= 0) {
+      return {
+        errors: `Пожалуйста, укажите корректный аят суры - *${surahInfo.metadata.translation}*, начиная с 1 до ${surahInfo.metadata.total_verses}`,
+      };
+    }
+
     let ayahsText = `${bismillahInfo[ln]}\n\n`;
     const header = `Сура *«${surahMetadata.translation}»*, аяты ${startAyah}-${endAyah}\nОбщее количество аятов: ${surahMetadata.total_verses}`;
     const chunks = [];

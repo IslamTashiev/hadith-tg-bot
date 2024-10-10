@@ -231,7 +231,11 @@ module.exports.handlePublicCommands = (bot, msg) => {
     const ayahEnd = Number(match[3]) || ayahStart;
     const type = match[4];
 
-    const { chunks, header } = await getSurahText(surah, ayahStart, ayahEnd, type);
+    const { chunks, header, errors } = await getSurahText(surah, ayahStart, ayahEnd, type);
+
+    if (errors) {
+      return bot.sendMessage(chatId, errors, { parse_mode: "Markdown" });
+    }
 
     await bot.sendMessage(chatId, header, { parse_mode: "Markdown" });
     for (const chunk of chunks) {
