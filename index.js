@@ -11,6 +11,7 @@ const path = require("path");
     // require("./bot/commands");
     require("./bot/emits");
     require("./bot/callbacks");
+    require("./server/index");
 
     (async () => {
       const MONGO_URI = process.env.MONGO_URI;
